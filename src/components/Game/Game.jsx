@@ -1,4 +1,10 @@
-import { useState, createContext, useContext, useEffect } from 'react';
+import {
+  useState,
+  createContext,
+  useContext,
+  useEffect,
+  forwardRef,
+} from 'react';
 
 import { words } from '../../words';
 
@@ -152,8 +158,47 @@ function Board({ history, currentAttempt, reveal, error, rows, columns }) {
   );
 }
 
-function Letters() {
-  return 'Letters';
+const Button = forwardRef(({ letter, keyValue }, ref) => (
+  <button ref={ref} key={letter} data-key={keyValue || letter}>
+    {letter}
+  </button>
+));
+Button.displayName = 'Button';
+
+function Keyboard({ onKey }) {
+  const row1 = 'qwertyuiop';
+  const row2 = 'asdfghjkl';
+  const row3 = 'zxcvbnm';
+
+  const onClick = (e) => {
+    if (e.target.dataset.key) {
+      onKey(e.target.dataset.key);
+    }
+    // handleKey(key);
+    return false;
+  };
+
+  return (
+    <div className='keyboard' onClick={onClick}>
+      <div className='keyboard-row'>
+        {row1.split('').map((letter) => (
+          <Button key={letter} letter={letter} />
+        ))}
+      </div>
+      <div className='keyboard-row'>
+        {row2.split('').map((letter) => (
+          <Button key={letter} letter={letter} />
+        ))}
+      </div>
+      <div className='keyboard-row'>
+        {<Button className='one-and-a-half' letter='enter' />}
+        {row3.split('').map((letter) => (
+          <Button key={letter} letter={letter} />
+        ))}
+        {<Button className='one-and-a-half' letter='←' keyValue='backspace' />}
+      </div>
+    </div>
+  );
 }
 
 const getSecret = () => {
@@ -254,7 +299,7 @@ export default function Game() {
   }
 
   return (
-    <>
+    <div className='game'>
       <Secret.Provider value={secret}>
         <Board
           history={history}
@@ -264,8 +309,8 @@ export default function Game() {
           error={error}
           columns={secret.length}
         />
-        <Letters />
+        <Keyboard history={history} columns={secret.length} onKey={handleKey} />
       </Secret.Provider>
-    </>
+    </div>
   );
 }

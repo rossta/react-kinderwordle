@@ -1,10 +1,13 @@
 import { Game } from './components/Game';
 
-import './App.css';
-
 function App() {
   return (
-    <div className='App'>
+    <div className='app'>
+      <header>
+        <div></div>
+        <div className='title'>Kinderwordle</div>
+        <div></div>
+      </header>
       <Game />
     </div>
   );
