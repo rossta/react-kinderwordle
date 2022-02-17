@@ -41,6 +41,7 @@
     "react-hooks/exhaustive-deps": "warn",
     "no-param-reassign": "off",
     "no-unused-vars": "warn",
-    "no-debugger": "warn"
+    "no-debugger": "warn",
+    "no-empty": "off"
   }
 }
