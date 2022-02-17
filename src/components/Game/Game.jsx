@@ -1,16 +1,18 @@
 import {
-  useState,
   createContext,
+  forwardRef,
   useContext,
   useEffect,
-  forwardRef,
+  useRef,
+  useState,
 } from 'react';
 
 import { words } from '../../words';
+import { save, load } from '../../localStorageWrapper';
 
 const Secret = createContext();
 
-const getLetterState = (attemptLetter, index, secret, attempted) => {
+const getLetterState = (attemptLetter, secret, attempted, indices = []) => {
   if (attemptLetter === undefined) {
     return 'empty';
   }
@@ -19,9 +21,7 @@ const getLetterState = (attemptLetter, index, secret, attempted) => {
     return 'tbd';
   }
 
-  const correctLetter = secret[index];
-
-  if (attemptLetter === correctLetter) {
+  if (indices.map((i) => secret[i]).includes(attemptLetter)) {
     return 'correct';
   }
 
@@ -66,8 +66,6 @@ function Tile({ letter, targetState, reveal, index }) {
 function Row({ attempt, index, state, columns, error = null, reveal = null }) {
   const secret = useContext(Secret);
 
-  console.log('Rendering row ', index, reveal);
-
   let animation = 'idle';
   let animationDelay = undefined;
 
@@ -90,7 +88,7 @@ function Row({ attempt, index, state, columns, error = null, reveal = null }) {
       {[...Array(columns).keys()].map((i) => {
         const letter = attempt[i];
         const attempted = state === 'attempted';
-        const letterState = getLetterState(letter, i, secret, attempted);
+        const letterState = getLetterState(letter, secret, attempted, [i]);
 
         return (
           <Tile
@@ -107,26 +105,6 @@ function Row({ attempt, index, state, columns, error = null, reveal = null }) {
 }
 
 function Board({ history, currentAttempt, reveal, error, rows, columns }) {
-  console.log({ reveal });
-
-  const rowData = [
-    ...history.map((attempt, i) => ({
-      attempt,
-      state: 'attempted',
-      reveal: reveal && i === history.length - 1 ? reveal : null,
-    })),
-
-    {
-      attempt: currentAttempt,
-      state: 'current',
-      error,
-    },
-
-    ...Array(rows - (history.length + 1))
-      .fill(null)
-      .map(() => ({ attempt: '', state: 'empty' })),
-  ];
-
   const empties = Array(rows - (history.length + 1)).fill(null);
 
   return (
@@ -165,34 +143,35 @@ const Button = forwardRef(({ letter, keyValue }, ref) => (
 ));
 Button.displayName = 'Button';
 
-function Keyboard({ onKey }) {
-  const row1 = 'qwertyuiop';
-  const row2 = 'asdfghjkl';
-  const row3 = 'zxcvbnm';
+function Keyboard({ onKey, fade }) {
+  const secret = useContext(Secret);
 
   const onClick = (e) => {
     if (e.target.dataset.key) {
       onKey(e.target.dataset.key);
     }
-    // handleKey(key);
     return false;
   };
 
   return (
-    <div className='keyboard' onClick={onClick}>
+    <div
+      className='keyboard'
+      onClick={onClick}
+      style={{ opacity: fade ? 0.3 : undefined }}
+    >
       <div className='keyboard-row'>
-        {row1.split('').map((letter) => (
+        {'qwertyuiop'.split('').map((letter) => (
           <Button key={letter} letter={letter} />
         ))}
       </div>
       <div className='keyboard-row'>
-        {row2.split('').map((letter) => (
+        {'asdfghjkl'.split('').map((letter) => (
           <Button key={letter} letter={letter} />
         ))}
       </div>
       <div className='keyboard-row'>
         {<Button className='one-and-a-half' letter='enter' />}
-        {row3.split('').map((letter) => (
+        {'zxcvbnm'.split('').map((letter) => (
           <Button key={letter} letter={letter} />
         ))}
         {<Button className='one-and-a-half' letter='←' keyValue='backspace' />}
@@ -205,20 +184,90 @@ const getSecret = () => {
   return words[Math.floor(Math.random() * words.length)];
 };
 
-const secret = getSecret();
+const usePersistedSecret = () => {
+  const [secret, setSecret] = useState(null);
+  const loadedRef = useRef(false);
+
+  useEffect(() => {
+    if (loadedRef.current) return;
+
+    const value = load('secret') || getSecret();
+
+    setSecret(value);
+
+    loadedRef.current = true;
+  }, []);
+
+  useEffect(() => {
+    save('secret', secret);
+  }, [secret]);
+
+  return [secret, setSecret];
+};
+
+const usePersistedHistory = () => {
+  const [history, setHistory] = useState([]);
+  const loadedRef = useRef(false);
+
+  useEffect(() => {
+    if (loadedRef.current) return;
+
+    const persistedHistory = load('history');
+    console.log('loaded history', history);
+
+    loadedRef.current = true;
+    if (persistedHistory) {
+      setHistory(persistedHistory);
+    }
+  }, []);
+
+  useEffect(() => {
+    save('history', history);
+  }, [history]);
+
+  return [history, setHistory];
+};
+
+function NewGameButton({ onClick }) {
+  return (
+    <a className='cta-button' onClick={onClick}>
+      New game
+    </a>
+  );
+}
 
 export default function Game() {
   const limit = 6;
-  const [history, setHistory] = useState([]);
+  const [secret, setSecret] = usePersistedSecret();
+  const [history, setHistory] = usePersistedHistory();
   const [currentAttempt, setCurrentAttempt] = useState('');
   const [winner, setWinner] = useState(false);
   const [error, setError] = useState(null);
   const [reveal, setReveal] = useState(null);
+  const gameRef = useRef(null);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
+
+    const lastAttempt = history.slice(-1)[0];
+    if (lastAttempt === secret) {
+      setWinner(true);
+    }
+
     return () => window.removeEventListener('keydown', handleKeyDown);
   });
+
+  function resetGame() {
+    setWinner(false);
+    setSecret(getSecret());
+    setHistory([]);
+  }
+
+  function setWinnerWithTimeout() {
+    setTimeout(() => {
+      setWinner(true);
+    }, 2000);
+  }
 
   function setRevealWithTimeout(reason) {
     setReveal(reason);
@@ -272,7 +321,7 @@ export default function Game() {
       if (currentAttempt === secret) {
         console.log('Winner!');
         setRevealWithTimeout('winner');
-        setWinner(true);
+        setWinnerWithTimeout();
       } else {
         console.log('Attempt: incorrect!');
         setRevealWithTimeout('incorrect');
@@ -298,9 +347,11 @@ export default function Game() {
     }
   }
 
+  if (!secret) return 'Loading';
+
   return (
-    <div className='game'>
-      <Secret.Provider value={secret}>
+    <Secret.Provider value={secret}>
+      <div className='game'>
         <Board
           history={history}
           currentAttempt={currentAttempt}
@@ -308,9 +359,16 @@ export default function Game() {
           reveal={reveal}
           error={error}
           columns={secret.length}
+          onKeyDown={handleKeyDown}
         />
-        <Keyboard history={history} columns={secret.length} onKey={handleKey} />
-      </Secret.Provider>
-    </div>
+        <Keyboard
+          history={history}
+          columns={secret.length}
+          onKey={handleKey}
+          fade={winner}
+        />
+        {winner && <NewGameButton onClick={resetGame} />}
+      </div>
+    </Secret.Provider>
   );
 }

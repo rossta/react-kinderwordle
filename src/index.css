@@ -116,6 +116,7 @@ code {
   height: calc(100% - var(--header-height));
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 header {
@@ -190,7 +191,6 @@ header .title {
     line-height: 1em;
   }
 } */
-
 
 .tile[data-state='empty'] {
   border: 2px solid var(--color-tone-4);
@@ -294,7 +294,8 @@ header .title {
 }
 
 @keyframes Bounce {
-  0%, 20% {
+  0%,
+  20% {
     transform: translateY(0);
   }
   40% {
@@ -369,7 +370,7 @@ button {
   justify-content: center;
   align-items: center;
   text-transform: uppercase;
-  -webkit-tap-highlight-color: rgba(0,0,0,0.3);
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.3);
 }
 
 button:focus {
@@ -414,4 +415,29 @@ button[data-state='present'] {
 button[data-state='absent'] {
   background-color: var(--key-bg-absent);
   color: var(--key-evaluated-text-color);
+}
+
+.cta-button {
+  font-family: inherit;
+  font-weight: bold;
+  border: 0;
+  padding: 0;
+  margin: 0 6px 0 0;
+  height: 58px;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  background-color: var(--color-correct);
+  color: var(--color-tone-7);
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  padding: 0 15px;
+  bottom: 75px;
+  left: 0;
+  right: 0px;
+  margin: 0 auto;
+  width: 150px;
 }
