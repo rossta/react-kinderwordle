@@ -12,25 +12,34 @@ import { save, load } from '../../localStorageWrapper';
 
 const Secret = createContext();
 
-const getLetterState = (attemptLetter, secret, attempted, indices = []) => {
-  if (attemptLetter === undefined) {
+function getLetterState({ attempt, secret, index, rowState }) {
+  const letter = attempt[index];
+
+  if (letter === undefined) {
     return 'empty';
   }
 
-  if (!attempted) {
+  if (rowState !== 'attempted') {
     return 'tbd';
   }
 
-  if (indices.map((i) => secret[i]).includes(attemptLetter)) {
+  if (letter === secret[index]) {
     return 'correct';
   }
 
-  if (secret.includes(attemptLetter)) {
+  const countOfLetterInSecret = secret.split(letter).length - 1;
+  const countOfLetterInAttemptSoFar =
+    attempt.slice(0, index).split(letter).length - 1;
+
+  if (
+    countOfLetterInSecret > 0 &&
+    countOfLetterInSecret > countOfLetterInAttemptSoFar
+  ) {
     return 'present';
   }
 
   return 'absent';
-};
+}
 
 function Tile({ letter, targetState, reveal, index }) {
   const [animation, setAnimation] = useState('idle');
@@ -88,16 +97,19 @@ function Row({ attempt, rowState, columnCount, error = null, reveal = null }) {
         gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
       }}
     >
-      {[...Array(columnCount).keys()].map((i) => {
-        const letter = attempt[i];
-        const attempted = rowState === 'attempted';
-        const letterState = getLetterState(letter, secret, attempted, [i]);
+      {[...Array(columnCount).keys()].map((index) => {
+        const letterState = getLetterState({
+          attempt,
+          secret,
+          index,
+          rowState,
+        });
 
         return (
           <Tile
-            key={i}
-            index={i}
-            letter={letter}
+            key={index}
+            index={index}
+            letter={attempt[index]}
             reveal={reveal}
             targetState={letterState}
           />

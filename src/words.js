@@ -60,6 +60,7 @@ was
 we
 what
 where
+when
 with
 yellow
 yes
