@@ -1,6 +1,7 @@
 import {
   createContext,
   forwardRef,
+  memo,
   useContext,
   useEffect,
   useRef,
@@ -72,7 +73,15 @@ function Tile({ letter, targetState, reveal, index }) {
   );
 }
 
-function Row({ attempt, rowState, columnCount, error = null, reveal = null }) {
+function Row({
+  number,
+  attempt,
+  rowState,
+  columnCount,
+  error = null,
+  reveal = null,
+}) {
+  console.log('row', { number, attempt, rowState, columnCount, error, reveal });
   const secret = useContext(Secret);
 
   let animation = 'idle';
@@ -119,14 +128,10 @@ function Row({ attempt, rowState, columnCount, error = null, reveal = null }) {
   );
 }
 
-function Board({
-  history,
-  currentAttempt,
-  reveal,
-  error,
-  rowCount,
-  columnCount,
-}) {
+const RowMemo = memo(Row);
+
+function Board({ history, currentAttempt, result, rowCount, columnCount }) {
+  const currentNumber = history.length + 1;
   const attemptsLeft = rowCount - history.length;
   const emptyCount = Math.max(attemptsLeft - 1, 0);
   const empties = Array(emptyCount).fill(null);
@@ -135,8 +140,9 @@ function Board({
     <div className='board-container'>
       <div className='board' style={{ width: `${72.5 * columnCount}px` }}>
         {history.map((attempt, i) => (
-          <Row
-            key={i}
+          <RowMemo
+            key={`history-${i}`}
+            number={i + 1}
             columnCount={columnCount}
             attempt={attempt}
             rowState='attempted'
@@ -144,15 +150,23 @@ function Board({
           />
         ))}
         {attemptsLeft > 0 && (
-          <Row
+          <RowMemo
+            key='current'
             attempt={currentAttempt}
+            number={currentNumber}
             rowState='current'
             error={error}
             columnCount={columnCount}
           />
         )}
         {empties.map((_, i) => (
-          <Row key={i} attempt='' rowState='empty' columnCount={columnCount} />
+          <RowMemo
+            key={`empty-${i}`}
+            number={currentNumber + i + 1}
+            attempt=''
+            rowState='empty'
+            columnCount={columnCount}
+          />
         ))}
       </div>
     </div>
