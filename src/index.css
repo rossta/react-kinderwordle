@@ -417,27 +417,27 @@ button[data-state='absent'] {
   color: var(--key-evaluated-text-color);
 }
 
+.actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
 .cta-button {
   font-family: inherit;
   font-weight: bold;
-  border: 0;
-  padding: 0;
-  margin: 0 6px 0 0;
-  height: 58px;
-  border-radius: 4px;
   cursor: pointer;
   user-select: none;
   background-color: var(--color-correct);
   color: var(--color-tone-7);
   text-transform: uppercase;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  padding: 0 15px;
-  bottom: 75px;
-  left: 0;
-  right: 0px;
-  margin: 0 auto;
-  width: 150px;
+  margin: 1em auto;
+  display: inline-block;
+  outline: 0;
+  border: 0;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 16px;
+  line-height: 26px;
 }

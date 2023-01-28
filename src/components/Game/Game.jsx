@@ -395,7 +395,9 @@ export default function Game() {
           onKey={handleKey}
           fade={winner}
         />
-        {winner && <NewGameButton onClick={resetGame} />}
+      </div>
+      <div className='actions'>
+        <NewGameButton onClick={resetGame} />
       </div>
     </Secret.Provider>
   );
