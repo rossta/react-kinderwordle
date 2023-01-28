@@ -107,40 +107,51 @@ function Row({ attempt, rowState, columnCount, error = null, reveal = null }) {
   );
 }
 
-function Board({ history, currentAttempt, reveal, error, rows, columns }) {
-  const empties = Array(rows - (history.length + 1)).fill(null);
+function Board({
+  history,
+  currentAttempt,
+  reveal,
+  error,
+  rowCount,
+  columnCount,
+}) {
+  const empties = Array(rowCount - (history.length + 1)).fill(null);
 
   return (
     <div className='board-container'>
-      <div className='board' style={{ width: `${72.5 * columns}px` }}>
+      <div className='board' style={{ width: `${72.5 * columnCount}px` }}>
         {history.map((attempt, i) => (
           <Row
             key={i}
-            index={i}
-            columns={columns}
+            columnCount={columnCount}
             attempt={attempt}
-            state='attempted'
+            rowState='attempted'
             reveal={reveal && i === history.length - 1 ? reveal : null}
           />
         ))}
         {
           <Row
             attempt={currentAttempt}
-            state='current'
+            rowState='current'
             error={error}
-            columns={columns}
+            columnCount={columnCount}
           />
         }
         {empties.map((_, i) => (
-          <Row key={i} attempt='' state='empty' columns={columns} />
+          <Row key={i} attempt='' rowState='empty' columnCount={columnCount} />
         ))}
       </div>
     </div>
   );
 }
 
-const Button = forwardRef(({ letter, keyValue }, ref) => (
-  <button ref={ref} key={letter} data-key={keyValue || letter}>
+const Button = forwardRef(({ letter, keyValue, className }, ref) => (
+  <button
+    ref={ref}
+    key={letter}
+    data-key={keyValue || letter}
+    className={className}
+  >
     {letter}
   </button>
 ));
@@ -168,9 +179,11 @@ function Keyboard({ onKey, fade }) {
         ))}
       </div>
       <div className='keyboard-row'>
+        <div className='half'></div>
         {'asdfghjkl'.split('').map((letter) => (
           <Button key={letter} letter={letter} />
         ))}
+        <div className='half'></div>
       </div>
       <div className='keyboard-row'>
         {<Button className='one-and-a-half' letter='enter' />}
