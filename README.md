@@ -1,4 +1,6 @@
-# Getting Started with Create React App
+# React Kinderwordle
+
+A Wordle app, but for grade school students.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
