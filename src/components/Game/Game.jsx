@@ -42,14 +42,14 @@ function getLetterState({ attempt, secret, index, rowState }) {
   return 'absent';
 }
 
-function Tile({ letter, targetState, reveal, index }) {
+function Tile({ letter, targetState, isRevealing, index }) {
   const [animation, setAnimation] = useState('idle');
   const [state, setState] = useState('empty');
 
   const delay = index * 250;
 
   useEffect(() => {
-    if (reveal) {
+    if (isRevealing) {
       setAnimation('flip-in');
       setTimeout(() => {
         setState(targetState);
@@ -57,7 +57,7 @@ function Tile({ letter, targetState, reveal, index }) {
     } else {
       setState(targetState);
     }
-  }, [reveal, targetState]);
+  }, [isRevealing, targetState]);
 
   return (
     <div
@@ -73,16 +73,18 @@ function Tile({ letter, targetState, reveal, index }) {
   );
 }
 
-function Row({
-  number,
-  attempt,
-  rowState,
-  columnCount,
-  error = null,
-  reveal = null,
-}) {
-  console.log('row', { number, attempt, rowState, columnCount, error, reveal });
+function Row({ number, attempt, rowState, columnCount, result = null }) {
+  console.log('row', {
+    number,
+    attempt,
+    rowState,
+    columnCount,
+    result,
+  });
   const secret = useContext(Secret);
+  const error = result && result.error;
+  const code = result && result.code;
+  const isRevealing = result && !result.error;
 
   let animation = 'idle';
   let animationDelay = undefined;
@@ -91,7 +93,7 @@ function Row({
     animation = 'shake';
   }
 
-  if (reveal === 'winner') {
+  if (code === 'winner') {
     animation = 'bounce';
     animationDelay = `${columnCount * 250 + 500}ms`;
   }
@@ -119,7 +121,7 @@ function Row({
             key={index}
             index={index}
             letter={attempt[index]}
-            reveal={reveal}
+            isRevealing={isRevealing}
             targetState={letterState}
           />
         );
@@ -146,7 +148,7 @@ function Board({ history, currentAttempt, result, rowCount, columnCount }) {
             columnCount={columnCount}
             attempt={attempt}
             rowState='attempted'
-            reveal={reveal && i === history.length - 1 ? reveal : null}
+            result={result && i === history.length - 1 ? result : null}
           />
         ))}
         {attemptsLeft > 0 && (
@@ -155,7 +157,6 @@ function Board({ history, currentAttempt, result, rowCount, columnCount }) {
             attempt={currentAttempt}
             number={currentNumber}
             rowState='current'
-            error={error}
             columnCount={columnCount}
           />
         )}
@@ -286,8 +287,7 @@ export default function Game() {
   const [history, setHistory] = usePersistedHistory();
   const [currentAttempt, setCurrentAttempt] = useState('');
   const [winner, setWinner] = useState(false);
-  const [error, setError] = useState(null);
-  const [reveal, setReveal] = useState(null);
+  const [result, setResult] = useState(null);
   const gameRef = useRef(null);
 
   useEffect(() => {
@@ -313,17 +313,10 @@ export default function Game() {
     }, 2000);
   }
 
-  function setRevealWithTimeout(reason) {
-    setReveal(reason);
+  function setResultWithTimeout(result) {
+    setResult(result);
     setTimeout(() => {
-      setReveal(null);
-    }, 2000);
-  }
-
-  function setErrorWithTimeout(reason) {
-    setError(reason);
-    setTimeout(() => {
-      setError(null);
+      setResult(null);
     }, 2000);
   }
 
@@ -337,7 +330,7 @@ export default function Game() {
   function handleKey(key) {
     console.log('key entered', key);
 
-    if (winner || reveal) {
+    if (winner || result) {
       return;
     }
 
@@ -348,7 +341,7 @@ export default function Game() {
     if (key === 'enter') {
       if (currentAttempt.length < secret.length) {
         console.log('insufficent');
-        setErrorWithTimeout('insufficient');
+        setResultWithTimeout({ code: 'insufficient', error: true });
         return;
       }
 
@@ -357,18 +350,18 @@ export default function Game() {
       }
 
       if (!words.includes(currentAttempt)) {
-        alert('Not in word list');
-        setErrorWithTimeout('unrecognized');
+        // alert('Not in word list');
+        setResultWithTimeout({ code: 'unrecognized', error: true });
         return;
       }
 
       if (currentAttempt === secret) {
         console.log('Winner!');
-        setRevealWithTimeout('winner');
         setWinnerWithTimeout();
+        setResultWithTimeout({ code: 'winner' });
       } else {
-        console.log('Attempt: incorrect!');
-        setRevealWithTimeout('incorrect');
+        console.log('Good try, guess again!');
+        setResultWithTimeout({ code: 'incorrect' });
       }
 
       setHistory([...history, currentAttempt]);
@@ -400,8 +393,7 @@ export default function Game() {
           history={history}
           currentAttempt={currentAttempt}
           rowCount={limit}
-          reveal={reveal}
-          error={error}
+          result={result}
           columnCount={secret.length}
           onKeyDown={handleKeyDown}
         />
