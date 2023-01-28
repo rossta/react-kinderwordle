@@ -127,7 +127,9 @@ function Board({
   rowCount,
   columnCount,
 }) {
-  const empties = Array(rowCount - (history.length + 1)).fill(null);
+  const attemptsLeft = rowCount - history.length;
+  const emptyCount = Math.max(attemptsLeft - 1, 0);
+  const empties = Array(emptyCount).fill(null);
 
   return (
     <div className='board-container'>
@@ -141,14 +143,14 @@ function Board({
             reveal={reveal && i === history.length - 1 ? reveal : null}
           />
         ))}
-        {
+        {attemptsLeft > 0 && (
           <Row
             attempt={currentAttempt}
             rowState='current'
             error={error}
             columnCount={columnCount}
           />
-        }
+        )}
         {empties.map((_, i) => (
           <Row key={i} attempt='' rowState='empty' columnCount={columnCount} />
         ))}
@@ -393,7 +395,7 @@ export default function Game() {
           history={history}
           columnCount={secret.length}
           onKey={handleKey}
-          fade={winner}
+          fade={winner || history.length >= limit}
         />
       </div>
       <div className='actions'>
