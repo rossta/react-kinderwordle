@@ -63,7 +63,7 @@ function Tile({ letter, targetState, reveal, index }) {
   );
 }
 
-function Row({ attempt, index, state, columns, error = null, reveal = null }) {
+function Row({ attempt, rowState, columnCount, error = null, reveal = null }) {
   const secret = useContext(Secret);
 
   let animation = 'idle';
@@ -75,19 +75,22 @@ function Row({ attempt, index, state, columns, error = null, reveal = null }) {
 
   if (reveal === 'winner') {
     animation = 'bounce';
-    animationDelay = `${columns * 250 + 500}ms`;
+    animationDelay = `${columnCount * 250 + 500}ms`;
   }
 
   return (
     <div
       className='row'
-      data-state={state}
+      data-state={rowState}
       data-animation={animation}
-      style={{ animationDelay, gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+      style={{
+        animationDelay,
+        gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
+      }}
     >
-      {[...Array(columns).keys()].map((i) => {
+      {[...Array(columnCount).keys()].map((i) => {
         const letter = attempt[i];
-        const attempted = state === 'attempted';
+        const attempted = rowState === 'attempted';
         const letterState = getLetterState(letter, secret, attempted, [i]);
 
         return (
@@ -355,15 +358,15 @@ export default function Game() {
         <Board
           history={history}
           currentAttempt={currentAttempt}
-          rows={limit}
+          rowCount={limit}
           reveal={reveal}
           error={error}
-          columns={secret.length}
+          columnCount={secret.length}
           onKeyDown={handleKeyDown}
         />
         <Keyboard
           history={history}
-          columns={secret.length}
+          columnCount={secret.length}
           onKey={handleKey}
           fade={winner}
         />
