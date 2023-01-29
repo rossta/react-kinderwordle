@@ -411,7 +411,7 @@ export default function Game() {
   const [secret, setSecret] = usePersistedSecret();
   const [history, setHistory] = usePersistedHistory();
   const [currentAttempt, setCurrentAttempt] = useState('');
-  const [winner, setWinner] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
   const [result, setResult] = useState(null);
   const lastAttempt = history.slice(-1)[0];
 
@@ -419,19 +419,19 @@ export default function Game() {
 
   useEffect(() => {
     if (lastAttempt === secret) {
-      setWinner(true);
+      setGameOver(true);
     }
   }, [lastAttempt]);
 
   function resetGame() {
-    setWinner(false);
+    setGameOver(false);
     setSecret(getSecret());
     setHistory([]);
   }
 
-  function setWinnerWithTimeout() {
+  function setGameOverWithTimeout() {
     setTimeout(() => {
-      setWinner(true);
+      setGameOver(true);
     }, 2000);
   }
 
@@ -440,6 +440,48 @@ export default function Game() {
     setTimeout(() => {
       setResult(null);
     }, 2000);
+  }
+
+  function handleAttempt() {
+    console.log('handleAttempt for', currentAttempt);
+
+    if (currentAttempt.length < secret.length) {
+      console.log('insufficent');
+      setResultWithTimeout({ code: 'insufficient', error: true });
+      return;
+    }
+
+    if (currentAttempt.length > secret.length) {
+      return;
+    }
+
+    if (!words.includes(currentAttempt)) {
+      // alert('Not in word list');
+      setResultWithTimeout({ code: 'unrecognized', error: true });
+      return;
+    }
+
+    if (currentAttempt === secret) {
+      console.log('Winner!');
+      setGameOverWithTimeout();
+      setResultWithTimeout({ code: 'winner' });
+    } else {
+      console.log('Good try, guess again!');
+      setResultWithTimeout({ code: 'incorrect' });
+    }
+
+    setHistory([...history, currentAttempt]);
+    setCurrentAttempt('');
+  }
+
+  function deleteLastLetter() {
+    console.log('Removing letter');
+    setCurrentAttempt(currentAttempt.slice(0, currentAttempt.length - 1));
+  }
+
+  function addLetter(letter) {
+    console.log('Adding letter: ', currentAttempt, ' + ', letter);
+    setCurrentAttempt(currentAttempt + letter);
   }
 
   function handleKeyDown(e) {
@@ -452,57 +494,26 @@ export default function Game() {
   function handleKey(key) {
     console.log('key entered', key);
 
-    if (winner || result) {
-      return;
-    }
-
-    if (history.length === limit) {
+    if (gameOver || result || history.length >= limit) {
       return;
     }
 
     if (key === 'enter') {
-      if (currentAttempt.length < secret.length) {
-        console.log('insufficent');
-        setResultWithTimeout({ code: 'insufficient', error: true });
-        return;
-      }
-
-      if (currentAttempt.length > secret.length) {
-        return;
-      }
-
-      if (!words.includes(currentAttempt)) {
-        // alert('Not in word list');
-        setResultWithTimeout({ code: 'unrecognized', error: true });
-        return;
-      }
-
-      if (currentAttempt === secret) {
-        console.log('Winner!');
-        setWinnerWithTimeout();
-        setResultWithTimeout({ code: 'winner' });
-      } else {
-        console.log('Good try, guess again!');
-        setResultWithTimeout({ code: 'incorrect' });
-      }
-
-      setHistory([...history, currentAttempt]);
-      setCurrentAttempt('');
-    }
-
-    if (key === 'backspace') {
-      console.log('Removing letter');
-      setCurrentAttempt(currentAttempt.slice(0, currentAttempt.length - 1));
+      handleAttempt();
 
       return;
     }
 
-    if (/^[a-z]$/.test(key)) {
-      if (currentAttempt.length < secret.length) {
-        console.log('Adding letter: ', currentAttempt, ' + ', key);
-        setCurrentAttempt(currentAttempt + key);
-        return;
-      }
+    if (key === 'backspace') {
+      deleteLastLetter();
+
+      return;
+    }
+
+    if (/^[a-z]$/.test(key) && currentAttempt.length < secret.length) {
+      addLetter(key);
+
+      return;
     }
   }
 
@@ -524,7 +535,7 @@ export default function Game() {
           history={history}
           columnCount={secret.length}
           onKey={handleKey}
-          fade={winner || history.length >= limit}
+          fade={gameOver || result || history.length >= limit}
         />
       </div>
       <div className='actions'>
