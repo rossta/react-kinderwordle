@@ -281,6 +281,38 @@ function NewGameButton({ onClick }) {
   );
 }
 
+function determineToastMessage(result, attemptCount) {
+  if (!result) return null;
+  if (!result.code) return null;
+
+  const code = result.code;
+
+  switch (code) {
+    case 'unrecognized':
+      return 'Not in word list';
+    case 'insufficient':
+      return 'Not enough letters';
+    case 'winner':
+      return [
+        'WOW!!!!!',
+        'Impressive',
+        'You rock',
+        'Well done',
+        'Got it',
+        'Phew!!!',
+      ][attemptCount - 1];
+
+    default:
+      return null;
+  }
+}
+
+function Toast({ message }) {
+  if (!message || !message.length) return '';
+
+  return <div className='toast show'>{message}</div>;
+}
+
 export default function Game() {
   const limit = 6;
   const [secret, setSecret] = usePersistedSecret();
@@ -389,6 +421,7 @@ export default function Game() {
   return (
     <Secret.Provider value={secret}>
       <div className='game'>
+        <Toast message={determineToastMessage(result, history.length)} />
         <Board
           history={history}
           currentAttempt={currentAttempt}

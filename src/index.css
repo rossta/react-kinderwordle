@@ -441,3 +441,32 @@ button[data-state='absent'] {
   font-size: 16px;
   line-height: 26px;
 }
+
+.toast {
+  visibility: hidden;
+  background-color: var(--color-tone-1);
+  color: var(--color-tone-7);
+  text-align: center;
+  border-radius: 4px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  transform: translateX(-50%);
+  left: 50%;
+  top: 30px;
+}
+
+.toast.show {
+  visibility: visible;
+  animation: FadeIn 0.5s, FadeOut 0.5s 2.5s;
+}
+
+@keyframes FadeIn {
+  from {top: 0; opacity: 0;}
+  to {top: 30px; opacity: 1;}
+}
+
+@keyframes FadeOut {
+  from {top: 30px; opacity: 1;}
+  to {top: 0; opacity: 0;}
+}
