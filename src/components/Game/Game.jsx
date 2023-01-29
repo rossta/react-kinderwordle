@@ -132,6 +132,23 @@ function Row({ number, attempt, rowState, columnCount, result = null }) {
 
 const RowMemo = memo(Row);
 
+function EmptyRows({ emptyCount, startingRowNumber, columnCount }) {
+  const empties = Array(emptyCount).fill(null);
+
+  return (
+    <>
+      {empties.map((_, i) => (
+        <RowMemo
+          key={`empty-${i}`}
+          number={startingRowNumber + i}
+          attempt=''
+          rowState='empty'
+          columnCount={columnCount}
+        />
+      ))}
+    </>
+  );
+}
 function Board({ history, currentAttempt, result, rowCount, columnCount }) {
   const currentNumber = history.length + 1;
   const attemptsLeft = rowCount - history.length;
@@ -160,15 +177,13 @@ function Board({ history, currentAttempt, result, rowCount, columnCount }) {
             columnCount={columnCount}
           />
         )}
-        {empties.map((_, i) => (
-          <RowMemo
-            key={`empty-${i}`}
-            number={currentNumber + i + 1}
-            attempt=''
-            rowState='empty'
+        {
+          <EmptyRows
+            emptyCount={emptyCount}
             columnCount={columnCount}
+            startingRowNumber={currentNumber + 1}
           />
-        ))}
+        }
       </div>
     </div>
   );
