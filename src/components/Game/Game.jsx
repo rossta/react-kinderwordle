@@ -22,9 +22,13 @@ const letterIndexes = (string, letter) => {
 };
 
 // Determining whether a letter is "present" but not already matched as "correct"
-const isLetterPresent = ({ attempt, secret, letter, indexes }) => {
-  // Find occurrences of letter in both attempt and secret strings
-  const attemptIndexes = letterIndexes(attempt, letter);
+const isLetterPresent = ({
+  secret,
+  letter,
+  attemptIndexes,
+  targetIndexes = attemptIndexes,
+}) => {
+  // Find occurrences of letter in secret string
   const secretIndexes = letterIndexes(secret, letter);
 
   // Determine which occurrences of letter in secret are not matched
@@ -38,19 +42,20 @@ const isLetterPresent = ({ attempt, secret, letter, indexes }) => {
     unmatchedSecretIndexes.length
   );
 
-  const presentIndexes = presentAttempts.filter((i) => indexes.indexOf(i) >= 0);
+  const presentIndexes = presentAttempts.filter(
+    (i) => targetIndexes.indexOf(i) >= 0
+  );
 
-  // console.log({
-  //   attempt,
-  //   secret,
-  //   letter,
-  //   indexes,
-  //   attemptIndexes,
-  //   secretIndexes,
-  //   unmatchedSecretIndexes,
-  //   presentAttempts,
-  //   presentIndexes,
-  // });
+  console.log({
+    secret,
+    letter,
+    targetIndexes,
+    attemptIndexes,
+    secretIndexes,
+    unmatchedSecretIndexes,
+    presentAttempts,
+    presentIndexes,
+  });
   if (presentIndexes.length) {
     return true;
   } else {
@@ -58,12 +63,12 @@ const isLetterPresent = ({ attempt, secret, letter, indexes }) => {
   }
 };
 
-function getLetterState({ attempt, secret, letter, indexes }) {
-  if (indexes.map((i) => secret[i]).includes(letter)) {
+function getLetterState({ secret, letter, attemptIndexes, targetIndexes }) {
+  if (targetIndexes.map((i) => secret[i]).includes(letter)) {
     return 'correct';
   }
 
-  if (isLetterPresent({ attempt, secret, letter, indexes })) {
+  if (isLetterPresent({ secret, letter, attemptIndexes, targetIndexes })) {
     return 'present';
   }
 
@@ -86,7 +91,12 @@ export function getRowLetterState({
     return 'tbd';
   }
 
-  return getLetterState({ attempt, secret, letter, indexes: [index] });
+  return getLetterState({
+    secret,
+    letter,
+    attemptIndexes: letterIndexes(attempt, letter),
+    targetIndexes: [index],
+  });
 }
 
 function Tile({ letter, targetState, isRevealing, index }) {

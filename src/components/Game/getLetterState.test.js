@@ -93,18 +93,18 @@ describe('secret: ride', () => {
   });
 });
 
-describe('secret: here', () => {
-  let secret = 'here';
+describe('secret: when', () => {
+  let secret = 'when';
 
-  describe('attempt: help', () => {
-    let attempt = 'help';
+  describe('attempt: here', () => {
+    let attempt = 'here';
 
-    it('has correct', () => {
+    it('has present', () => {
       expect(getRowLetterState({ secret, attempt, index: 0 })).toEqual(
-        'correct'
+        'present'
       );
       expect(getRowLetterState({ secret, attempt, index: 1 })).toEqual(
-        'correct'
+        'present'
       );
     });
 
