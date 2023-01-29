@@ -139,7 +139,7 @@ function Row({
 
 const RowMemo = memo(Row);
 
-function EmptyRows({ emptyCount, startingRowNumber, columnCount }) {
+function EmptyRows({ emptyCount, startingNumber, columnCount }) {
   const empties = Array(emptyCount).fill(null);
 
   return (
@@ -147,7 +147,7 @@ function EmptyRows({ emptyCount, startingRowNumber, columnCount }) {
       {empties.map((_, i) => (
         <RowMemo
           key={`empty-${i}`}
-          number={startingRowNumber + i}
+          number={startingNumber + i}
           attempt=''
           rowState='empty'
           columnCount={columnCount}
@@ -158,16 +158,7 @@ function EmptyRows({ emptyCount, startingRowNumber, columnCount }) {
 }
 
 function HistoryRows({ history, columnCount, result }) {
-  const code = result && result.code;
   const isRevealing = result && !result.error;
-
-  let animation = 'idle';
-  let animationDelay = undefined;
-
-  if (code === 'winner') {
-    animation = 'bounce';
-    animationDelay = `${columnCount * 250 + 500}ms`;
-  }
 
   return (
     <>
@@ -178,15 +169,26 @@ function HistoryRows({ history, columnCount, result }) {
           columnCount={columnCount}
           attempt={attempt}
           rowState='attempted'
-          isRevealing={isRevealing && i === history.length - 1}
+          isRevealing={isRevealing && i === history.length - 1} // only reveal last row in history
         />
       ))}
     </>
   );
 }
 
+function CurrentRow({ attempt, number, columnCount }) {
+  return (
+    <RowMemo
+      key='current'
+      attempt={attempt}
+      number={number}
+      rowState='current'
+      columnCount={columnCount}
+    />
+  );
+}
+
 function Board({ history, currentAttempt, result, rowCount, columnCount }) {
-  const currentNumber = history.length + 1;
   const attemptsLeft = rowCount - history.length;
   const emptyCount = Math.max(attemptsLeft - 1, 0);
 
@@ -201,19 +203,17 @@ function Board({ history, currentAttempt, result, rowCount, columnCount }) {
           />
         }
         {attemptsLeft > 0 && (
-          <RowMemo
-            key='current'
+          <CurrentRow
             attempt={currentAttempt}
-            number={currentNumber}
-            rowState='current'
             columnCount={columnCount}
+            number={history.length + 1}
           />
         )}
         {
           <EmptyRows
             emptyCount={emptyCount}
             columnCount={columnCount}
-            startingRowNumber={currentNumber + 1}
+            startingNumber={history.length + 2}
           />
         }
       </div>
