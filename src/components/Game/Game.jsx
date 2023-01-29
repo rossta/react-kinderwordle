@@ -185,8 +185,14 @@ function EmptyRows({ emptyCount, startingNumber, columnCount }) {
   );
 }
 
-function HistoryRows({ history, columnCount, result, hasWinner }) {
-  const isRevealing = result && !result.error;
+function HistoryRows({
+  history,
+  columnCount,
+  isRevealing = false,
+  hasWinner = false,
+}) {
+  // Only animate last row in history
+  const lastRowIndex = history.length - 1;
 
   return (
     <>
@@ -197,8 +203,8 @@ function HistoryRows({ history, columnCount, result, hasWinner }) {
           columnCount={columnCount}
           attempt={attempt}
           rowState='attempted'
-          animationType={hasWinner ? 'winner' : null}
-          isRevealing={isRevealing && i === history.length - 1} // only reveal last row in history
+          animationType={hasWinner && i === lastRowIndex ? 'winner' : null}
+          isRevealing={isRevealing && i === lastRowIndex}
         />
       ))}
     </>
@@ -229,7 +235,7 @@ function Board({ history, currentAttempt, result, rowCount, columnCount }) {
           <HistoryRows
             history={history}
             columnCount={columnCount}
-            result={result}
+            isRevealing={result && !result.error}
             hasWinner={result && result.code === 'winner'}
           />
         }
