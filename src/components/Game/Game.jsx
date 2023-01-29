@@ -22,9 +22,7 @@ const letterIndexes = (string, letter) => {
 };
 
 // Determining whether a letter is "present" but not already matched as "correct"
-const isPresentAndNotCorrect = (attempt, secret, index) => {
-  const letter = attempt[index];
-
+const isLetterPresent = ({ attempt, secret, letter, indexes }) => {
   // Find occurrences of letter in both attempt and secret strings
   const attemptIndexes = letterIndexes(attempt, letter);
   const secretIndexes = letterIndexes(secret, letter);
@@ -40,12 +38,39 @@ const isPresentAndNotCorrect = (attempt, secret, index) => {
     unmatchedSecretIndexes.length
   );
 
-  if (presentAttempts.includes(index)) {
-    return 'present';
+  const presentIndexes = presentAttempts.filter((i) => indexes.indexOf(i) >= 0);
+
+  // console.log({
+  //   attempt,
+  //   secret,
+  //   letter,
+  //   indexes,
+  //   attemptIndexes,
+  //   secretIndexes,
+  //   unmatchedSecretIndexes,
+  //   presentAttempts,
+  //   presentIndexes,
+  // });
+  if (presentIndexes.length) {
+    return true;
+  } else {
+    return false;
   }
 };
 
-export function getLetterState({
+function getLetterState({ attempt, secret, letter, indexes }) {
+  if (indexes.map((i) => secret[i]).includes(letter)) {
+    return 'correct';
+  }
+
+  if (isLetterPresent({ attempt, secret, letter, indexes })) {
+    return 'present';
+  }
+
+  return 'absent';
+}
+
+export function getRowLetterState({
   attempt,
   secret,
   index,
@@ -61,15 +86,7 @@ export function getLetterState({
     return 'tbd';
   }
 
-  if (letter === secret[index]) {
-    return 'correct';
-  }
-
-  if (isPresentAndNotCorrect(attempt, secret, index)) {
-    return 'present';
-  }
-
-  return 'absent';
+  return getLetterState({ attempt, secret, letter, indexes: [index] });
 }
 
 function Tile({ letter, targetState, isRevealing, index }) {
@@ -160,7 +177,7 @@ function Row({
       }}
     >
       {[...Array(columnCount).keys()].map((index) => {
-        const letterState = getLetterState({
+        const letterState = getRowLetterState({
           attempt,
           secret,
           index,

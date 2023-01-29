@@ -1,4 +1,4 @@
-import { getLetterState } from './Game';
+import { getRowLetterState } from './Game';
 
 describe('secret: here', () => {
   let secret = 'here';
@@ -7,17 +7,25 @@ describe('secret: here', () => {
     let attempt = 'help';
 
     it('has correct', () => {
-      expect(getLetterState({ secret, attempt, index: 0 })).toEqual('correct');
-      expect(getLetterState({ secret, attempt, index: 1 })).toEqual('correct');
+      expect(getRowLetterState({ secret, attempt, index: 0 })).toEqual(
+        'correct'
+      );
+      expect(getRowLetterState({ secret, attempt, index: 1 })).toEqual(
+        'correct'
+      );
     });
 
     it('has absent', () => {
-      expect(getLetterState({ secret, attempt, index: 2 })).toEqual('absent');
-      expect(getLetterState({ secret, attempt, index: 3 })).toEqual('absent');
+      expect(getRowLetterState({ secret, attempt, index: 2 })).toEqual(
+        'absent'
+      );
+      expect(getRowLetterState({ secret, attempt, index: 3 })).toEqual(
+        'absent'
+      );
     });
 
     it('has empty', () => {
-      expect(getLetterState({ secret, attempt, index: 4 })).toEqual('empty');
+      expect(getRowLetterState({ secret, attempt, index: 4 })).toEqual('empty');
     });
   });
 });
@@ -29,17 +37,25 @@ describe('secret: help', () => {
     let attempt = 'here';
 
     it('has correct', () => {
-      expect(getLetterState({ secret, attempt, index: 0 })).toEqual('correct');
-      expect(getLetterState({ secret, attempt, index: 1 })).toEqual('correct');
+      expect(getRowLetterState({ secret, attempt, index: 0 })).toEqual(
+        'correct'
+      );
+      expect(getRowLetterState({ secret, attempt, index: 1 })).toEqual(
+        'correct'
+      );
     });
 
     it('has absent', () => {
-      expect(getLetterState({ secret, attempt, index: 2 })).toEqual('absent');
-      expect(getLetterState({ secret, attempt, index: 3 })).toEqual('absent');
+      expect(getRowLetterState({ secret, attempt, index: 2 })).toEqual(
+        'absent'
+      );
+      expect(getRowLetterState({ secret, attempt, index: 3 })).toEqual(
+        'absent'
+      );
     });
 
     it('has empty', () => {
-      expect(getLetterState({ secret, attempt, index: 4 })).toEqual('empty');
+      expect(getRowLetterState({ secret, attempt, index: 4 })).toEqual('empty');
     });
   });
 });
@@ -51,20 +67,58 @@ describe('secret: ride', () => {
     let attempt = 'here';
 
     it('has correct', () => {
-      expect(getLetterState({ secret, attempt, index: 3 })).toEqual('correct');
+      expect(getRowLetterState({ secret, attempt, index: 3 })).toEqual(
+        'correct'
+      );
     });
 
     it('has present', () => {
-      expect(getLetterState({ secret, attempt, index: 2 })).toEqual('present');
+      expect(getRowLetterState({ secret, attempt, index: 2 })).toEqual(
+        'present'
+      );
     });
 
     it('has absent', () => {
-      expect(getLetterState({ secret, attempt, index: 0 })).toEqual('absent');
-      expect(getLetterState({ secret, attempt, index: 1 })).toEqual('absent');
+      expect(getRowLetterState({ secret, attempt, index: 0 })).toEqual(
+        'absent'
+      );
+      expect(getRowLetterState({ secret, attempt, index: 1 })).toEqual(
+        'absent'
+      );
     });
 
     it('has empty', () => {
-      expect(getLetterState({ secret, attempt, index: 4 })).toEqual('empty');
+      expect(getRowLetterState({ secret, attempt, index: 4 })).toEqual('empty');
+    });
+  });
+});
+
+describe('secret: here', () => {
+  let secret = 'here';
+
+  describe('attempt: help', () => {
+    let attempt = 'help';
+
+    it('has correct', () => {
+      expect(getRowLetterState({ secret, attempt, index: 0 })).toEqual(
+        'correct'
+      );
+      expect(getRowLetterState({ secret, attempt, index: 1 })).toEqual(
+        'correct'
+      );
+    });
+
+    it('has absent', () => {
+      expect(getRowLetterState({ secret, attempt, index: 2 })).toEqual(
+        'absent'
+      );
+      expect(getRowLetterState({ secret, attempt, index: 3 })).toEqual(
+        'absent'
+      );
+    });
+
+    it('has empty', () => {
+      expect(getRowLetterState({ secret, attempt, index: 4 })).toEqual('empty');
     });
   });
 });
