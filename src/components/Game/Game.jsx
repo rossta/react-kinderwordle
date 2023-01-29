@@ -76,27 +76,43 @@ function Tile({ letter, targetState, isRevealing, index }) {
   const [animation, setAnimation] = useState('idle');
   const [state, setState] = useState('empty');
 
-  const delay = index * 250;
+  const TIMEOUT_INCREMENT = 300;
+  const delay = index * TIMEOUT_INCREMENT;
 
+  const resetAnimationWithTimeout = () => {
+    setTimeout(() => {
+      setAnimation('idle');
+    }, TIMEOUT_INCREMENT);
+  };
   useEffect(() => {
     if (isRevealing) {
       setAnimation('flip-in');
       setTimeout(() => {
         setState(targetState);
-      }, delay + 250);
+        resetAnimationWithTimeout();
+      }, delay + TIMEOUT_INCREMENT);
     } else {
+      if (targetState === 'tbd') {
+        setAnimation('pop-in');
+        resetAnimationWithTimeout();
+      }
       setState(targetState);
     }
-  }, [isRevealing, targetState]);
+  }, [isRevealing, targetState, delay]);
+
+  let style = {};
+  if (animation === 'flip-in') {
+    style = {
+      animationDelay: `${delay}ms, ${delay + TIMEOUT_INCREMENT}ms`,
+    };
+  }
 
   return (
     <div
       className='tile'
       data-state={state}
       data-animation={animation}
-      style={{
-        animationDelay: `${delay}ms, ${delay + 250}ms`,
-      }}
+      style={style}
     >
       {letter}
     </div>

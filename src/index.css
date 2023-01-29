@@ -217,12 +217,7 @@ header .title {
   background-color: var(--color-absent);
 }
 
-.tile[data-animation='pop'] {
-  animation-name: PopIn;
-  animation-duration: 100ms;
-}
-
-/* .tile[data-animation] {
+.tile[data-animation='pop-in'] {
   animation-name: PopIn;
   animation-duration: 100ms;
 }
@@ -234,14 +229,14 @@ header .title {
   }
 
   40% {
-    transform: scale(1.1);
+    transform: scale(1.2);
     opacity: 1;
   }
-} */
+}
 
 .tile[data-animation='flip-in'] {
   animation-name: FlipIn, FlipOut;
-  animation-duration: 250ms, 250ms;
+  animation-duration: 300ms, 300ms;
   animation-timing-function: ease-in, ease-in;
   animation-iteration-count: 1, 1;
 }
@@ -259,7 +254,7 @@ header .title {
 
 .tile[data-animation='flip-out'] {
   animation-name: FlipOut;
-  animation-duration: 250ms;
+  animation-duration: 300ms;
   animation-timing-function: ease-in;
 }
 
