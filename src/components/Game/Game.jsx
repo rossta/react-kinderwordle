@@ -13,14 +13,51 @@ import { save, load } from '../../localStorageWrapper';
 
 const Secret = createContext();
 
-function getLetterState({ attempt, secret, index, rowState }) {
+// Collect indexes of a given letter in a given string
+const letterIndexes = (string, letter) => {
+  let a = [],
+    i = -1;
+  while ((i = string.indexOf(letter, i + 1)) >= 0) a.push(i);
+  return a;
+};
+
+// Determining whether a letter is "present" but not already matched as "correct"
+const isPresentAndNotCorrect = (attempt, secret, index) => {
+  const letter = attempt[index];
+
+  // Find occurrences of letter in both attempt and secret strings
+  const attemptIndexes = letterIndexes(attempt, letter);
+  const secretIndexes = letterIndexes(secret, letter);
+
+  // Determine which occurrences of letter in secret are not matched
+  const unmatchedSecretIndexes = secretIndexes.filter(
+    (x) => attemptIndexes.indexOf(x) < 0
+  );
+
+  // Determine if given attempt index is one of the first N unmatched indexes
+  const presentAttempts = attemptIndexes.slice(
+    0,
+    unmatchedSecretIndexes.length
+  );
+
+  if (presentAttempts.includes(index)) {
+    return 'present';
+  }
+};
+
+export function getLetterState({
+  attempt,
+  secret,
+  index,
+  inCurrentRow = false,
+}) {
   const letter = attempt[index];
 
   if (letter === undefined) {
     return 'empty';
   }
 
-  if (rowState !== 'attempted') {
+  if (inCurrentRow) {
     return 'tbd';
   }
 
@@ -28,14 +65,7 @@ function getLetterState({ attempt, secret, index, rowState }) {
     return 'correct';
   }
 
-  const countOfLetterInSecret = secret.split(letter).length - 1;
-  const countOfLetterInAttemptSoFar =
-    attempt.slice(0, index).split(letter).length - 1;
-
-  if (
-    countOfLetterInSecret > 0 &&
-    countOfLetterInSecret > countOfLetterInAttemptSoFar
-  ) {
+  if (isPresentAndNotCorrect(attempt, secret, index)) {
     return 'present';
   }
 
@@ -80,27 +110,25 @@ function Row({
   columnCount,
   isRevealing = false,
   animationType = 'idle',
-  result = null,
 }) {
   console.log('row', {
     number,
     attempt,
     rowState,
     columnCount,
-    result,
+    animationType,
   });
+
   const secret = useContext(Secret);
-  const error = result && result.error;
-  const code = result && result.code;
 
   let animation = 'idle';
   let animationDelay = undefined;
 
-  if (error || animationType === 'error') {
+  if (animationType === 'error') {
     animation = 'shake';
   }
 
-  if (code === 'winner' || animationType === 'winner') {
+  if (animationType === 'winner') {
     animation = 'bounce';
     animationDelay = `${columnCount * 250 + 500}ms`;
   }
@@ -120,7 +148,7 @@ function Row({
           attempt,
           secret,
           index,
-          rowState,
+          inCurrentRow: rowState === 'current',
         });
 
         return (
@@ -157,7 +185,7 @@ function EmptyRows({ emptyCount, startingNumber, columnCount }) {
   );
 }
 
-function HistoryRows({ history, columnCount, result }) {
+function HistoryRows({ history, columnCount, result, hasWinner }) {
   const isRevealing = result && !result.error;
 
   return (
@@ -169,6 +197,7 @@ function HistoryRows({ history, columnCount, result }) {
           columnCount={columnCount}
           attempt={attempt}
           rowState='attempted'
+          animationType={hasWinner ? 'winner' : null}
           isRevealing={isRevealing && i === history.length - 1} // only reveal last row in history
         />
       ))}
@@ -176,7 +205,7 @@ function HistoryRows({ history, columnCount, result }) {
   );
 }
 
-function CurrentRow({ attempt, number, columnCount }) {
+function CurrentRow({ attempt, number, columnCount, hasError }) {
   return (
     <RowMemo
       key='current'
@@ -184,6 +213,7 @@ function CurrentRow({ attempt, number, columnCount }) {
       number={number}
       rowState='current'
       columnCount={columnCount}
+      animationType={hasError ? 'error' : null}
     />
   );
 }
@@ -200,6 +230,7 @@ function Board({ history, currentAttempt, result, rowCount, columnCount }) {
             history={history}
             columnCount={columnCount}
             result={result}
+            hasWinner={result && result.code === 'winner'}
           />
         }
         {attemptsLeft > 0 && (
@@ -207,6 +238,7 @@ function Board({ history, currentAttempt, result, rowCount, columnCount }) {
             attempt={currentAttempt}
             columnCount={columnCount}
             number={history.length + 1}
+            hasError={result && result.error}
           />
         )}
         {
