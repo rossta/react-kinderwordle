@@ -73,7 +73,15 @@ function Tile({ letter, targetState, isRevealing, index }) {
   );
 }
 
-function Row({ number, attempt, rowState, columnCount, result = null }) {
+function Row({
+  number,
+  attempt,
+  rowState,
+  columnCount,
+  isRevealing = false,
+  animationType = 'idle',
+  result = null,
+}) {
   console.log('row', {
     number,
     attempt,
@@ -84,16 +92,15 @@ function Row({ number, attempt, rowState, columnCount, result = null }) {
   const secret = useContext(Secret);
   const error = result && result.error;
   const code = result && result.code;
-  const isRevealing = result && !result.error;
 
   let animation = 'idle';
   let animationDelay = undefined;
 
-  if (error) {
+  if (error || animationType === 'error') {
     animation = 'shake';
   }
 
-  if (code === 'winner') {
+  if (code === 'winner' || animationType === 'winner') {
     animation = 'bounce';
     animationDelay = `${columnCount * 250 + 500}ms`;
   }
@@ -149,25 +156,50 @@ function EmptyRows({ emptyCount, startingRowNumber, columnCount }) {
     </>
   );
 }
+
+function HistoryRows({ history, columnCount, result }) {
+  const code = result && result.code;
+  const isRevealing = result && !result.error;
+
+  let animation = 'idle';
+  let animationDelay = undefined;
+
+  if (code === 'winner') {
+    animation = 'bounce';
+    animationDelay = `${columnCount * 250 + 500}ms`;
+  }
+
+  return (
+    <>
+      {history.map((attempt, i) => (
+        <RowMemo
+          key={`history-${i}`}
+          number={i + 1}
+          columnCount={columnCount}
+          attempt={attempt}
+          rowState='attempted'
+          isRevealing={isRevealing && i === history.length - 1}
+        />
+      ))}
+    </>
+  );
+}
+
 function Board({ history, currentAttempt, result, rowCount, columnCount }) {
   const currentNumber = history.length + 1;
   const attemptsLeft = rowCount - history.length;
   const emptyCount = Math.max(attemptsLeft - 1, 0);
-  const empties = Array(emptyCount).fill(null);
 
   return (
     <div className='board-container'>
       <div className='board' style={{ width: `${72.5 * columnCount}px` }}>
-        {history.map((attempt, i) => (
-          <RowMemo
-            key={`history-${i}`}
-            number={i + 1}
+        {
+          <HistoryRows
+            history={history}
             columnCount={columnCount}
-            attempt={attempt}
-            rowState='attempted'
-            result={result && i === history.length - 1 ? result : null}
+            result={result}
           />
-        ))}
+        }
         {attemptsLeft > 0 && (
           <RowMemo
             key='current'
