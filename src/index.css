@@ -428,7 +428,7 @@ button[data-state='absent'] {
   font-weight: bold;
   cursor: pointer;
   user-select: none;
-  background-color: var(--color-correct);
+  background-color: var(--darkendGreen);
   color: var(--color-tone-7);
   text-transform: uppercase;
   margin: 1em auto;
@@ -440,6 +440,15 @@ button[data-state='absent'] {
   padding: 8px 16px;
   font-size: 16px;
   line-height: 26px;
+}
+
+.cta-button.game-over {
+  position: absolute;
+  top: 500px;
+}
+
+.cta-button.secondary {
+  background-color: var(--darkendYellow);
 }
 
 .toast {

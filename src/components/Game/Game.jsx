@@ -358,9 +358,12 @@ const usePersistedHistory = () => {
   return [history, setHistory];
 };
 
-function NewGameButton({ onClick }) {
+function NewGameButton({ onClick, gameOver }) {
   return (
-    <a className='cta-button' onClick={onClick}>
+    <a
+      className={'cta-button ' + (gameOver ? 'game-over' : 'secondary')}
+      onClick={onClick}
+    >
       New game
     </a>
   );
@@ -539,7 +542,7 @@ export default function Game() {
         />
       </div>
       <div className='actions'>
-        <NewGameButton onClick={resetGame} />
+        <NewGameButton onClick={resetGame} gameOver={gameOver} />
       </div>
     </Secret.Provider>
   );
