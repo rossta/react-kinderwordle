@@ -398,6 +398,14 @@ function Toast({ message }) {
   return <div className='toast show'>{message}</div>;
 }
 
+function useEventListener(eventName, handler) {
+  useEffect(() => {
+    window.addEventListener(eventName, handler);
+
+    return () => window.removeEventListener(eventName, handler);
+  }, [handler]);
+}
+
 export default function Game() {
   const limit = 6;
   const [secret, setSecret] = usePersistedSecret();
@@ -405,18 +413,15 @@ export default function Game() {
   const [currentAttempt, setCurrentAttempt] = useState('');
   const [winner, setWinner] = useState(false);
   const [result, setResult] = useState(null);
-  const gameRef = useRef(null);
+  const lastAttempt = history.slice(-1)[0];
+
+  useEventListener('keydown', handleKeyDown);
 
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-
-    const lastAttempt = history.slice(-1)[0];
     if (lastAttempt === secret) {
       setWinner(true);
     }
-
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  });
+  }, [lastAttempt]);
 
   function resetGame() {
     setWinner(false);
