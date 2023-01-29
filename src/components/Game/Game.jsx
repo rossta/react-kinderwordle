@@ -369,7 +369,7 @@ function NewGameButton({ onClick, gameOver }) {
   );
 }
 
-function determineToastMessage(result, attemptCount) {
+function determineToastMessage(result, secret, attemptCount) {
   if (!result) return null;
   if (!result.code) return null;
 
@@ -380,6 +380,8 @@ function determineToastMessage(result, attemptCount) {
       return 'Not in word list';
     case 'insufficient':
       return 'Not enough letters';
+    case 'loser':
+      return `Better luck next time: ${secret.toUpperCase()}`;
     case 'winner':
       return [
         'WOW!!!!!',
@@ -432,21 +434,29 @@ export default function Game() {
     setHistory([]);
   }
 
-  function setGameOverWithTimeout() {
-    setTimeout(() => {
-      setGameOver(true);
-    }, 2000);
-  }
-
-  function setResultWithTimeout(result) {
+  const SHORTER_TIMEOUT = 1500;
+  const LONGER_TIMEOUT = 4000;
+  function setResultWithTimeout(
+    result,
+    timeout = SHORTER_TIMEOUT,
+    callback = () => {}
+  ) {
     setResult(result);
     setTimeout(() => {
       setResult(null);
-    }, 2000);
+      callback();
+    }, timeout);
   }
 
   function handleAttempt() {
     console.log('handleAttempt for', currentAttempt);
+
+    /* Invalid attempts */
+
+    if (currentAttempt.length > secret.length) {
+      setCurrentAttempt(currentAttempt.slice(0, secret.length));
+      return;
+    }
 
     if (currentAttempt.length < secret.length) {
       console.log('insufficent');
@@ -454,20 +464,23 @@ export default function Game() {
       return;
     }
 
-    if (currentAttempt.length > secret.length) {
-      return;
-    }
-
     if (!words.includes(currentAttempt)) {
-      // alert('Not in word list');
       setResultWithTimeout({ code: 'unrecognized', error: true });
       return;
     }
 
+    /* Valid attempts */
+
     if (currentAttempt === secret) {
       console.log('Winner!');
-      setGameOverWithTimeout();
-      setResultWithTimeout({ code: 'winner' });
+      setResultWithTimeout({ code: 'winner' }, LONGER_TIMEOUT, () =>
+        setGameOver(true)
+      );
+    } else if (history.length + 1 >= limit) {
+      console.log('Out of tries!');
+      setResultWithTimeout({ code: 'loser' }, LONGER_TIMEOUT, () =>
+        setGameOver(true)
+      );
     } else {
       console.log('Good try, guess again!');
       setResultWithTimeout({ code: 'incorrect' });
@@ -525,7 +538,9 @@ export default function Game() {
   return (
     <Secret.Provider value={secret}>
       <div className='game'>
-        <Toast message={determineToastMessage(result, history.length)} />
+        <Toast
+          message={determineToastMessage(result, secret, history.length)}
+        />
         <Board
           history={history}
           currentAttempt={currentAttempt}

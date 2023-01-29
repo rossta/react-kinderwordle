@@ -467,7 +467,7 @@ button[data-state='absent'] {
 
 .toast.show {
   visibility: visible;
-  animation: FadeIn 0.5s, FadeOut 0.5s 2.5s;
+  animation: FadeIn 0.5s, FadeOut 0.5s 3.5s;
 }
 
 @keyframes FadeIn {
