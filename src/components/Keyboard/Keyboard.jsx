@@ -41,7 +41,8 @@ function LetterButton({ letter, history, columnCount }) {
     }
   }, [letterState]);
 
-  console.log({ letter, state, letterState, history });
+  // For debugging
+  // console.log({ letter, state, letterState, history });
 
   return (
     <Button
