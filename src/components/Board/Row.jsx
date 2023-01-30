@@ -11,7 +11,7 @@ export function getRowLetterState({ attempt, secret, index }) {
   return getLetterState({
     secret,
     letter,
-    attemptIndexes: letterIndexes(attempt, letter),
+    attempts: [attempt],
     targetIndexes: [index],
   });
 }
@@ -38,6 +38,10 @@ function BasicRow({
   );
 }
 
+// A history row displays all previous attempts, including the one just
+// attempted. Letter states will be "correct", "present", or "absent". A
+// winning attempt will cause the row to bounce. A just-entered attempt "is
+// revealing" which has a flip-in animation.
 export function HistoryRow({
   attempt,
   rowState,
@@ -83,6 +87,7 @@ export function HistoryRow({
   );
 }
 
+// An empty row only has empty tiles
 export function EmptyRow({ columnCount }) {
   return (
     <BasicRow
@@ -96,6 +101,9 @@ export function EmptyRow({ columnCount }) {
   );
 }
 
+// The current row will shake when an error is detected. Its tile letter states
+// are "tbd" (a letter has been chosen but we don't know if it's in the word
+// yet) and "empty" (no letter).
 export function CurrentRow({ attempt, columnCount, animationType }) {
   let animation = 'idle';
   if (animationType === 'error') {
