@@ -83,30 +83,6 @@ export function getLetterState({
   return 'absent';
 }
 
-export function getRowLetterState({
-  attempt,
-  secret,
-  index,
-  inCurrentRow = false,
-}) {
-  const letter = attempt[index];
-
-  if (letter === undefined) {
-    return 'empty';
-  }
-
-  if (inCurrentRow) {
-    return 'tbd';
-  }
-
-  return getLetterState({
-    secret,
-    letter,
-    attemptIndexes: letterIndexes(attempt, letter),
-    targetIndexes: [index],
-  });
-}
-
 const getSecret = () => {
   return words[Math.floor(Math.random() * words.length)];
 };
