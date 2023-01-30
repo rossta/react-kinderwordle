@@ -110,17 +110,19 @@ export function getRowLetterState({
   });
 }
 
+const REVEAL_TIMEOUT_INCREMENT = 300;
+
 function Tile({ letter, targetState, isRevealing, index }) {
   const [animation, setAnimation] = useState('idle');
   const [state, setState] = useState('empty');
 
-  const TIMEOUT_INCREMENT = 300;
-  const delay = index * TIMEOUT_INCREMENT;
+  const delayStart = index * REVEAL_TIMEOUT_INCREMENT;
+  const delayEnd = delayStart + REVEAL_TIMEOUT_INCREMENT;
 
   const resetAnimationWithTimeout = () => {
     setTimeout(() => {
       setAnimation('idle');
-    }, TIMEOUT_INCREMENT);
+    }, REVEAL_TIMEOUT_INCREMENT);
   };
   useEffect(() => {
     if (isRevealing) {
@@ -128,7 +130,7 @@ function Tile({ letter, targetState, isRevealing, index }) {
       setTimeout(() => {
         setState(targetState);
         resetAnimationWithTimeout();
-      }, delay + TIMEOUT_INCREMENT);
+      }, delayEnd);
     } else {
       if (targetState === 'tbd') {
         setAnimation('pop-in');
@@ -136,12 +138,12 @@ function Tile({ letter, targetState, isRevealing, index }) {
       }
       setState(targetState);
     }
-  }, [isRevealing, targetState, delay]);
+  }, [isRevealing, targetState, delayEnd]);
 
   let style = {};
   if (animation === 'flip-in') {
     style = {
-      animationDelay: `${delay}ms, ${delay + TIMEOUT_INCREMENT}ms`,
+      animationDelay: `${delayStart}ms, ${delayEnd}ms`,
     };
   }
 
@@ -313,26 +315,22 @@ function Board({ history, currentAttempt, result, rowCount, columnCount }) {
   );
 }
 
-const Button = forwardRef(
-  ({ letter, keyValue, className, columnCount, state = 'empty' }, ref) => {
-    const delay = REVEAL_TIMEOUT_INCREMENT * columnCount;
+function Button({ letter, keyValue, className, columnCount, state = 'empty' }) {
+  return (
+    <button
+      key={letter}
+      data-state={state}
+      data-key={keyValue || letter}
+      className={className}
+    >
+      {letter}
+    </button>
+  );
+}
 
-    return (
-      <button
-        ref={ref}
-        key={letter}
-        data-state={state}
-        data-key={keyValue || letter}
-        className={className}
-      >
-        {letter}
-      </button>
-    );
-  }
-);
-Button.displayName = 'Button';
+function LetterButton({ letter, history, columnCount }) {
+  const [state, setState] = useState('empty');
 
-function LetterButton({ history, letter, columnCount }) {
   const secret = useContext(Secret);
 
   const attemptIndexes = [
@@ -341,11 +339,23 @@ function LetterButton({ history, letter, columnCount }) {
 
   const letterState = getLetterState({ secret, letter, attemptIndexes });
 
+  useEffect(() => {
+    if (letterState === 'empty') {
+      setState('empty');
+    } else {
+      setTimeout(() => {
+        setState(letterState);
+      }, REVEAL_TIMEOUT_INCREMENT * columnCount + REVEAL_TIMEOUT_INCREMENT);
+    }
+  }, [letterState]);
+
+  console.log({ letter, state, letterState, history });
+
   return (
     <Button
       key={letter}
       letter={letter}
-      state={letterState}
+      state={state}
       columnCount={columnCount}
     />
   );
@@ -513,18 +523,22 @@ export default function Game() {
   const [result, setResult] = useState(null);
   const lastAttempt = history.slice(-1)[0];
 
+  const attemptCount = history.length;
+
   useEventListener('keydown', handleKeyDown);
 
   useEffect(() => {
-    if (lastAttempt === secret) {
-      setGameOver(true);
+    if (lastAttempt === secret || attemptCount >= limit) {
+      setTimeout(() => setGameOver(true), LONGER_TIMEOUT);
     }
-  }, [lastAttempt]);
+  }, [lastAttempt, attemptCount]);
 
   function resetGame() {
+    setHistory([]);
+    setCurrentAttempt('');
     setGameOver(false);
     setSecret(getSecret());
-    setHistory([]);
+    setResult(null);
   }
 
   const SHORTER_TIMEOUT = 1500;
@@ -569,7 +583,7 @@ export default function Game() {
       setResultWithTimeout({ code: 'winner' }, LONGER_TIMEOUT, () =>
         setGameOver(true)
       );
-    } else if (history.length + 1 >= limit) {
+    } else if (attemptCount + 1 >= limit) {
       console.log('Out of tries!');
       setResultWithTimeout({ code: 'loser' }, LONGER_TIMEOUT, () =>
         setGameOver(true)
@@ -603,7 +617,7 @@ export default function Game() {
   function handleKey(key) {
     console.log('key entered', key);
 
-    if (gameOver || result || history.length >= limit) {
+    if (gameOver || result || attemptCount >= limit) {
       return;
     }
 
@@ -631,9 +645,7 @@ export default function Game() {
   return (
     <Secret.Provider value={secret}>
       <div className='game'>
-        <Toast
-          message={determineToastMessage(result, secret, history.length)}
-        />
+        <Toast message={determineToastMessage(result, secret, attemptCount)} />
         <Board
           history={history}
           currentAttempt={currentAttempt}
@@ -646,7 +658,7 @@ export default function Game() {
           history={history}
           columnCount={secret.length}
           onKey={handleKey}
-          fade={gameOver || history.length >= limit}
+          fade={gameOver}
         />
       </div>
       <div className='actions'>
