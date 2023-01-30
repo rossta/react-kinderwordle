@@ -25,19 +25,19 @@ function LetterButton({ letter, history, columnCount }) {
 
   const secret = useContext(Secret);
 
-  const attemptIndexes = [
-    ...new Set(history.map((attempt) => letterIndexes(attempt, letter)).flat()),
-  ];
-
-  const letterState = getLetterState({ secret, letter, attemptIndexes });
+  const letterState = getLetterState({ secret, letter, attempts: history });
 
   useEffect(() => {
     if (letterState === 'empty') {
       setState('empty');
     } else {
+      // When the letter has been used in the previous attempt, we delay revealing
+      // its state on the keyboard until the reveal animation has completed
+      const delay = REVEAL_TIMEOUT_INCREMENT * (columnCount + 1);
+
       setTimeout(() => {
         setState(letterState);
-      }, REVEAL_TIMEOUT_INCREMENT * columnCount + REVEAL_TIMEOUT_INCREMENT);
+      }, delay);
     }
   }, [letterState]);
 
