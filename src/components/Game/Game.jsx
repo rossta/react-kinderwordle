@@ -297,7 +297,7 @@ export default function Game() {
   return (
     <Secret.Provider value={secret}>
       <div className='game'>
-        <Toast result={result} secret={result} attemptCount={attemptCount} />
+        <Toast result={result} secret={secret} attemptCount={attemptCount} />
         <Board
           history={history}
           currentAttempt={currentAttempt}
