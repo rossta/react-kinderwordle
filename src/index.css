@@ -443,7 +443,7 @@ button[data-state='absent'] {
 }
 
 .cta-button.secondary {
-  background-color: var(--darkendYellow);
+  background-color: var(--color-tone-3);
 }
 
 .toast {
