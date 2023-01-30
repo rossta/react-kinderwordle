@@ -8,6 +8,7 @@ import {
 } from 'react';
 
 import Secret from '../Secret';
+import Toast from '../Toast';
 
 import { words } from '../../words';
 import { save, load } from '../../localStorageWrapper';
@@ -471,40 +472,6 @@ function NewGameButton({ onClick, gameOver }) {
   );
 }
 
-function determineToastMessage(result, secret, attemptCount) {
-  if (!result) return null;
-  if (!result.code) return null;
-
-  const code = result.code;
-
-  switch (code) {
-    case 'unrecognized':
-      return 'Not in word list';
-    case 'insufficient':
-      return 'Not enough letters';
-    case 'loser':
-      return `Better luck next time: ${secret.toUpperCase()}`;
-    case 'winner':
-      return [
-        'WOW!!!!!',
-        'Impressive',
-        'You rock',
-        'Well done',
-        'Got it',
-        'Phew!!!',
-      ][attemptCount - 1];
-
-    default:
-      return null;
-  }
-}
-
-function Toast({ message }) {
-  if (!message || !message.length) return '';
-
-  return <div className='toast show'>{message}</div>;
-}
-
 function useEventListener(eventName, handler) {
   useEffect(() => {
     window.addEventListener(eventName, handler);
@@ -644,7 +611,7 @@ export default function Game() {
   return (
     <Secret.Provider value={secret}>
       <div className='game'>
-        <Toast message={determineToastMessage(result, secret, attemptCount)} />
+        <Toast result={result} secret={result} attemptCount={attemptCount} />
         <Board
           history={history}
           currentAttempt={currentAttempt}
