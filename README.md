@@ -2,6 +2,8 @@
 
 A Wordle app, but for grade school students.
 
+[Play online](https://kinderwordle.onrender.com)
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
