@@ -9,17 +9,18 @@ import {
 
 import Secret from '../Secret';
 import Toast from '../Toast';
+import Keyboard from '../Keyboard';
 
 import { words } from '../../words';
 import { save, load } from '../../localStorageWrapper';
 
 // Collect indexes of a given letter in a given string
-const letterIndexes = (string, letter) => {
+export function letterIndexes(string, letter) {
   let a = [],
     i = -1;
   while ((i = string.indexOf(letter, i + 1)) >= 0) a.push(i);
   return a;
-};
+}
 
 // Determining whether a letter is "present" but not already matched as "correct"
 const isLetterPresent = ({ secret, letter, attemptIndexes, targetIndexes }) => {
@@ -110,7 +111,7 @@ export function getRowLetterState({
   });
 }
 
-const REVEAL_TIMEOUT_INCREMENT = 300;
+export const REVEAL_TIMEOUT_INCREMENT = 300;
 
 function Tile({ letter, targetState, isRevealing, index }) {
   const [animation, setAnimation] = useState('idle');
@@ -310,104 +311,6 @@ function Board({ history, currentAttempt, result, rowCount, columnCount }) {
             startingNumber={history.length + 2}
           />
         }
-      </div>
-    </div>
-  );
-}
-
-function Button({ letter, keyValue, className, columnCount, state = 'empty' }) {
-  return (
-    <button
-      key={letter}
-      data-state={state}
-      data-key={keyValue || letter}
-      className={className}
-    >
-      {letter}
-    </button>
-  );
-}
-
-function LetterButton({ letter, history, columnCount }) {
-  const [state, setState] = useState('empty');
-
-  const secret = useContext(Secret);
-
-  const attemptIndexes = [
-    ...new Set(history.map((attempt) => letterIndexes(attempt, letter)).flat()),
-  ];
-
-  const letterState = getLetterState({ secret, letter, attemptIndexes });
-
-  useEffect(() => {
-    if (letterState === 'empty') {
-      setState('empty');
-    } else {
-      setTimeout(() => {
-        setState(letterState);
-      }, REVEAL_TIMEOUT_INCREMENT * columnCount + REVEAL_TIMEOUT_INCREMENT);
-    }
-  }, [letterState]);
-
-  console.log({ letter, state, letterState, history });
-
-  return (
-    <Button
-      key={letter}
-      letter={letter}
-      state={state}
-      columnCount={columnCount}
-    />
-  );
-}
-
-function Keyboard({ onKey, fade, history, columnCount }) {
-  const onClick = (e) => {
-    if (e.target.dataset.key) {
-      onKey(e.target.dataset.key);
-    }
-    return false;
-  };
-
-  return (
-    <div
-      className='keyboard'
-      onClick={onClick}
-      style={{ opacity: fade ? 0.3 : undefined }}
-    >
-      <div className='keyboard-row'>
-        {'qwertyuiop'.split('').map((letter) => (
-          <LetterButton
-            key={letter}
-            letter={letter}
-            history={history}
-            columnCount={columnCount}
-          />
-        ))}
-      </div>
-      <div className='keyboard-row'>
-        <div className='half'></div>
-        {'asdfghjkl'.split('').map((letter) => (
-          <LetterButton
-            key={letter}
-            letter={letter}
-            history={history}
-            columnCount={columnCount}
-          />
-        ))}
-        <div className='half'></div>
-      </div>
-      <div className='keyboard-row'>
-        {<Button className='one-and-a-half' letter='enter' />}
-        {'zxcvbnm'.split('').map((letter) => (
-          <LetterButton
-            key={letter}
-            letter={letter}
-            history={history}
-            columnCount={columnCount}
-          />
-        ))}
-        {<Button className='one-and-a-half' letter='←' keyValue='backspace' />}
       </div>
     </div>
   );
