@@ -278,6 +278,10 @@ header .title {
   grid-gap: 5px;
 }
 
+.row.help {
+  grid-template-columns: repeat(8, 1fr);
+}
+
 .row[data-animation='shake'] {
   animation-name: Shake;
   animation-duration: 600ms;
@@ -426,7 +430,6 @@ button[data-state='absent'] {
   background-color: var(--darkendGreen);
   color: var(--color-tone-7);
   text-transform: uppercase;
-  margin: 1em auto;
   display: inline-block;
   outline: 0;
   border: 0;
@@ -435,6 +438,7 @@ button[data-state='absent'] {
   padding: 8px 16px;
   font-size: 16px;
   line-height: 26px;
+  text-decoration: none;
 }
 
 .cta-button.game-over {
@@ -445,6 +449,16 @@ button[data-state='absent'] {
 .cta-button.secondary {
   background-color: var(--color-tone-3);
 }
+
+.cta-button.help {
+  position: relative;
+}
+
+.cta-button:hover,
+.cta-button:focus {
+  cursor: pointer;
+}
+
 
 .toast {
   visibility: hidden;
@@ -473,4 +487,40 @@ button[data-state='absent'] {
 @keyframes FadeOut {
   from {top: 30px; opacity: 1;}
   to {top: 0; opacity: 0;}
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal.show {
+  display: block;
+}
+
+.modal-content {
+  background-color: var(--color-tone-7);
+  margin: 5rem auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 65%;
+  max-width: 500px;
+}
+
+.words {
+  margin: 0.5em 0;
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--color-tone-4);
+  padding: 0.5rem;
+  height: 300px;
+  overflow: scroll;
 }

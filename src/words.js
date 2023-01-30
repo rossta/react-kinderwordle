@@ -15,7 +15,6 @@ down
 eat
 find
 for
-for
 funny
 get
 go

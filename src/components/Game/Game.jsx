@@ -59,10 +59,16 @@ const usePersistedHistory = () => {
 };
 
 function NewGameButton({ onClick, gameOver }) {
+  const wrappedOnClick = (e) => {
+    e.preventDefault();
+    onClick();
+  };
+
   return (
     <a
+      href='#'
       className={'cta-button ' + (gameOver ? 'game-over' : 'secondary')}
-      onClick={onClick}
+      onClick={wrappedOnClick}
     >
       New game
     </a>
@@ -77,7 +83,7 @@ function useEventListener(eventName, handler) {
   }, [handler]);
 }
 
-export default function Game() {
+function Game() {
   const limit = 6;
   const [secret, setSecret] = usePersistedSecret();
   const [history, setHistory] = usePersistedHistory();
@@ -225,3 +231,5 @@ export default function Game() {
     </Secret.Provider>
   );
 }
+
+export default Game;
