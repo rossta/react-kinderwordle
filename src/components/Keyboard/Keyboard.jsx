@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, memo } from 'react';
 
 import Secret from '../Secret';
 import {
@@ -42,7 +42,7 @@ function LetterButton({ letter, history, columnCount }) {
   }, [letterState]);
 
   // For debugging
-  // console.log({ letter, state, letterState, history });
+  console.log({ letter, state, letterState, history });
 
   return (
     <Button
@@ -53,6 +53,9 @@ function LetterButton({ letter, history, columnCount }) {
     />
   );
 }
+
+const ButtonMemo = memo(Button);
+const LetterButtonMemo = memo(LetterButton);
 
 function Keyboard({ onKey, fade, history, columnCount }) {
   const onClick = (e) => {
@@ -70,7 +73,7 @@ function Keyboard({ onKey, fade, history, columnCount }) {
     >
       <div className='keyboard-row'>
         {'qwertyuiop'.split('').map((letter) => (
-          <LetterButton
+          <LetterButtonMemo
             key={letter}
             letter={letter}
             history={history}
@@ -81,7 +84,7 @@ function Keyboard({ onKey, fade, history, columnCount }) {
       <div className='keyboard-row'>
         <div className='half'></div>
         {'asdfghjkl'.split('').map((letter) => (
-          <LetterButton
+          <LetterButtonMemo
             key={letter}
             letter={letter}
             history={history}
@@ -91,16 +94,22 @@ function Keyboard({ onKey, fade, history, columnCount }) {
         <div className='half'></div>
       </div>
       <div className='keyboard-row'>
-        {<Button className='one-and-a-half' letter='enter' />}
+        {<ButtonMemo className='one-and-a-half' letter='enter' />}
         {'zxcvbnm'.split('').map((letter) => (
-          <LetterButton
+          <LetterButtonMemo
             key={letter}
             letter={letter}
             history={history}
             columnCount={columnCount}
           />
         ))}
-        {<Button className='one-and-a-half' letter='←' keyValue='backspace' />}
+        {
+          <ButtonMemo
+            className='one-and-a-half'
+            letter='←'
+            keyValue='backspace'
+          />
+        }
       </div>
     </div>
   );
