@@ -59,13 +59,29 @@ const isLetterPresent = ({ secret, letter, attemptIndexes, targetIndexes }) => {
 export function getLetterState({
   secret,
   letter,
+  attempts = [],
   attemptIndexes = [],
-  targetIndexes = attemptIndexes,
+  targetIndexes = null,
 }) {
-  const validAttemptIndexes = attemptIndexes.filter((i) => i < secret.length);
+  let givenAttemptIndexes = attemptIndexes;
+  if (attempts.length) {
+    givenAttemptIndexes = [
+      ...new Set(
+        attempts.map((attempt) => letterIndexes(attempt, letter)).flat()
+      ),
+    ];
+  }
+  let givenTargetIndexes = targetIndexes;
+  if (!givenTargetIndexes) {
+    givenTargetIndexes = givenAttemptIndexes;
+  }
+
+  const validAttemptIndexes = givenAttemptIndexes.filter(
+    (i) => i < secret.length
+  );
   if (!validAttemptIndexes.length) return 'empty';
 
-  if (targetIndexes.map((i) => secret[i]).includes(letter)) {
+  if (givenTargetIndexes.map((i) => secret[i]).includes(letter)) {
     return 'correct';
   }
 
@@ -74,7 +90,7 @@ export function getLetterState({
       secret,
       letter,
       attemptIndexes: validAttemptIndexes,
-      targetIndexes,
+      targetIndexes: givenTargetIndexes,
     })
   ) {
     return 'present';
