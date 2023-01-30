@@ -454,6 +454,10 @@ button[data-state='absent'] {
   position: relative;
 }
 
+.cta-button.disabled {
+  background-color: var(--color-tone-4);
+}
+
 .cta-button:hover,
 .cta-button:focus {
   cursor: pointer;

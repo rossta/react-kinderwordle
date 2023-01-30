@@ -58,16 +58,22 @@ const usePersistedHistory = () => {
   return [history, setHistory];
 };
 
-function NewGameButton({ onClick, gameOver }) {
+function NewGameButton({ onClick, gameOver, disabled = false }) {
   const wrappedOnClick = (e) => {
     e.preventDefault();
-    onClick();
+    if (!disabled) onClick();
   };
 
   return (
     <a
       href='#'
-      className={'cta-button ' + (gameOver ? 'game-over' : 'secondary')}
+      className={
+        'cta-button' +
+        ' ' +
+        (gameOver ? 'game-over' : 'secondary') +
+        ' ' +
+        (disabled ? 'disabled' : 'enabled')
+      }
       onClick={wrappedOnClick}
     >
       New game
@@ -226,7 +232,11 @@ function Game() {
         <Keyboard history={history} onKey={handleKey} fade={gameOver} />
       </div>
       <div className='actions'>
-        <NewGameButton onClick={resetGame} gameOver={gameOver} />
+        <NewGameButton
+          onClick={resetGame}
+          gameOver={gameOver}
+          disabled={!!result}
+        />
       </div>
     </Secret.Provider>
   );
