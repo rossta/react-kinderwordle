@@ -1,5 +1,4 @@
 import {
-  createContext,
   forwardRef,
   memo,
   useContext,
@@ -8,10 +7,10 @@ import {
   useState,
 } from 'react';
 
+import Secret from '../Secret';
+
 import { words } from '../../words';
 import { save, load } from '../../localStorageWrapper';
-
-const Secret = createContext();
 
 // Collect indexes of a given letter in a given string
 const letterIndexes = (string, letter) => {
