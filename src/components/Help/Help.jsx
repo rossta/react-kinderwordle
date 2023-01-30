@@ -32,18 +32,14 @@ function Help(props) {
           Kinderwordle is Wordle for kids! To help make guessing easier, you can
           choose to see the available words below.
         </p>
-        <p>
-          <a href='#' onClick={toggleWords}>
-            {showWords ? 'Hide' : 'Show'} the word list
-          </a>
-          {showWords && (
-            <div className='words'>
-              {words.map((word, i) => (
-                <div key={i}>{word}</div>
-              ))}
-            </div>
-          )}
-        </p>
+        <div>
+          <p>
+            <a href='#' onClick={toggleWords}>
+              {showWords ? 'Hide' : 'Show'} the word list
+            </a>
+          </p>
+          {showWords && <div className='words'>{words.join('\n')}</div>}
+        </div>
         <p>Here are some example results:</p>
         <div className='row help'>
           <div className='tile small' data-state='correct'>

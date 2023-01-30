@@ -19,9 +19,11 @@ function App() {
         <div></div>
         <div className='title'>Kinderwordle</div>
         <div>
-          <a href='#' onClick={onClickShowHelp(true)}>
-            Help
-          </a>
+          <span>
+            <a href='#' onClick={onClickShowHelp(true)}>
+              Help
+            </a>
+          </span>
         </div>
       </header>
       <Game />
