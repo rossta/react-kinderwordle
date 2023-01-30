@@ -22,12 +22,7 @@ const letterIndexes = (string, letter) => {
 };
 
 // Determining whether a letter is "present" but not already matched as "correct"
-const isLetterPresent = ({
-  secret,
-  letter,
-  attemptIndexes,
-  targetIndexes = attemptIndexes,
-}) => {
+const isLetterPresent = ({ secret, letter, attemptIndexes, targetIndexes }) => {
   // Find occurrences of letter in secret string
   const secretIndexes = letterIndexes(secret, letter);
 
@@ -46,16 +41,17 @@ const isLetterPresent = ({
     (i) => targetIndexes.indexOf(i) >= 0
   );
 
-  console.log({
-    secret,
-    letter,
-    targetIndexes,
-    attemptIndexes,
-    secretIndexes,
-    unmatchedSecretIndexes,
-    presentAttempts,
-    presentIndexes,
-  });
+  // For debugging:
+  // console.log({
+  //   secret,
+  //   letter,
+  //   targetIndexes,
+  //   attemptIndexes,
+  //   secretIndexes,
+  //   unmatchedSecretIndexes,
+  //   presentAttempts,
+  //   presentIndexes,
+  // });
   if (presentIndexes.length) {
     return true;
   } else {
@@ -63,12 +59,27 @@ const isLetterPresent = ({
   }
 };
 
-function getLetterState({ secret, letter, attemptIndexes, targetIndexes }) {
+export function getLetterState({
+  secret,
+  letter,
+  attemptIndexes = [],
+  targetIndexes = attemptIndexes,
+}) {
+  const validAttemptIndexes = attemptIndexes.filter((i) => i < secret.length);
+  if (!validAttemptIndexes.length) return 'empty';
+
   if (targetIndexes.map((i) => secret[i]).includes(letter)) {
     return 'correct';
   }
 
-  if (isLetterPresent({ secret, letter, attemptIndexes, targetIndexes })) {
+  if (
+    isLetterPresent({
+      secret,
+      letter,
+      attemptIndexes: validAttemptIndexes,
+      targetIndexes,
+    })
+  ) {
     return 'present';
   }
 
@@ -302,21 +313,45 @@ function Board({ history, currentAttempt, result, rowCount, columnCount }) {
   );
 }
 
-const Button = forwardRef(({ letter, keyValue, className }, ref) => (
-  <button
-    ref={ref}
-    key={letter}
-    data-key={keyValue || letter}
-    className={className}
-  >
-    {letter}
-  </button>
-));
+const Button = forwardRef(
+  ({ letter, keyValue, className, columnCount, state = 'empty' }, ref) => {
+    const delay = REVEAL_TIMEOUT_INCREMENT * columnCount;
+
+    return (
+      <button
+        ref={ref}
+        key={letter}
+        data-state={state}
+        data-key={keyValue || letter}
+        className={className}
+      >
+        {letter}
+      </button>
+    );
+  }
+);
 Button.displayName = 'Button';
 
-function Keyboard({ onKey, fade }) {
+function LetterButton({ history, letter, columnCount }) {
   const secret = useContext(Secret);
 
+  const attemptIndexes = [
+    ...new Set(history.map((attempt) => letterIndexes(attempt, letter)).flat()),
+  ];
+
+  const letterState = getLetterState({ secret, letter, attemptIndexes });
+
+  return (
+    <Button
+      key={letter}
+      letter={letter}
+      state={letterState}
+      columnCount={columnCount}
+    />
+  );
+}
+
+function Keyboard({ onKey, fade, history, columnCount }) {
   const onClick = (e) => {
     if (e.target.dataset.key) {
       onKey(e.target.dataset.key);
@@ -332,20 +367,35 @@ function Keyboard({ onKey, fade }) {
     >
       <div className='keyboard-row'>
         {'qwertyuiop'.split('').map((letter) => (
-          <Button key={letter} letter={letter} />
+          <LetterButton
+            key={letter}
+            letter={letter}
+            history={history}
+            columnCount={columnCount}
+          />
         ))}
       </div>
       <div className='keyboard-row'>
         <div className='half'></div>
         {'asdfghjkl'.split('').map((letter) => (
-          <Button key={letter} letter={letter} />
+          <LetterButton
+            key={letter}
+            letter={letter}
+            history={history}
+            columnCount={columnCount}
+          />
         ))}
         <div className='half'></div>
       </div>
       <div className='keyboard-row'>
         {<Button className='one-and-a-half' letter='enter' />}
         {'zxcvbnm'.split('').map((letter) => (
-          <Button key={letter} letter={letter} />
+          <LetterButton
+            key={letter}
+            letter={letter}
+            history={history}
+            columnCount={columnCount}
+          />
         ))}
         {<Button className='one-and-a-half' letter='←' keyValue='backspace' />}
       </div>
@@ -596,7 +646,7 @@ export default function Game() {
           history={history}
           columnCount={secret.length}
           onKey={handleKey}
-          fade={gameOver || result || history.length >= limit}
+          fade={gameOver || history.length >= limit}
         />
       </div>
       <div className='actions'>
