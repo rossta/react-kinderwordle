@@ -20,11 +20,12 @@ function Button({ letter, keyValue, className, state = 'empty' }) {
   );
 }
 
-function LetterButton({ letter, history, columnCount }) {
+function LetterButton({ letter, history }) {
   const [state, setState] = useState('empty');
 
   const secret = useContext(Secret);
 
+  const columnCount = secret.length;
   const letterState = getLetterState({ secret, letter, attempts: history });
 
   useEffect(() => {
@@ -44,20 +45,13 @@ function LetterButton({ letter, history, columnCount }) {
   // For debugging
   console.log({ letter, state, letterState, history });
 
-  return (
-    <Button
-      key={letter}
-      letter={letter}
-      state={state}
-      columnCount={columnCount}
-    />
-  );
+  return <Button key={letter} letter={letter} state={state} />;
 }
 
 const ButtonMemo = memo(Button);
 const LetterButtonMemo = memo(LetterButton);
 
-function Keyboard({ onKey, fade, history, columnCount }) {
+function Keyboard({ onKey, fade, history }) {
   const onClick = (e) => {
     if (e.target.dataset.key) {
       onKey(e.target.dataset.key);
@@ -73,35 +67,20 @@ function Keyboard({ onKey, fade, history, columnCount }) {
     >
       <div className='keyboard-row'>
         {'qwertyuiop'.split('').map((letter) => (
-          <LetterButtonMemo
-            key={letter}
-            letter={letter}
-            history={history}
-            columnCount={columnCount}
-          />
+          <LetterButtonMemo key={letter} letter={letter} history={history} />
         ))}
       </div>
       <div className='keyboard-row'>
         <div className='half'></div>
         {'asdfghjkl'.split('').map((letter) => (
-          <LetterButtonMemo
-            key={letter}
-            letter={letter}
-            history={history}
-            columnCount={columnCount}
-          />
+          <LetterButtonMemo key={letter} letter={letter} history={history} />
         ))}
         <div className='half'></div>
       </div>
       <div className='keyboard-row'>
         {<ButtonMemo className='one-and-a-half' letter='enter' />}
         {'zxcvbnm'.split('').map((letter) => (
-          <LetterButtonMemo
-            key={letter}
-            letter={letter}
-            history={history}
-            columnCount={columnCount}
-          />
+          <LetterButtonMemo key={letter} letter={letter} history={history} />
         ))}
         {
           <ButtonMemo

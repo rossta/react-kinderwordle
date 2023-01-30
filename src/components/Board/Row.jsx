@@ -42,14 +42,10 @@ function BasicRow({
 // attempted. Letter states will be "correct", "present", or "absent". A
 // winning attempt will cause the row to bounce. A just-entered attempt "is
 // revealing" which has a flip-in animation.
-export function HistoryRow({
-  attempt,
-  rowState,
-  animationType,
-  columnCount,
-  isRevealing,
-}) {
+export function HistoryRow({ attempt, rowState, animationType, isRevealing }) {
   const secret = useContext(Secret);
+  const columnCount = secret.length;
+
   let animation = 'idle';
   let animationDelay = undefined;
 
@@ -88,7 +84,10 @@ export function HistoryRow({
 }
 
 // An empty row only has empty tiles
-export function EmptyRow({ columnCount }) {
+export function EmptyRow() {
+  const secret = useContext(Secret);
+  const columnCount = secret.length;
+
   return (
     <BasicRow
       rowState='empty'
@@ -104,7 +103,10 @@ export function EmptyRow({ columnCount }) {
 // The current row will shake when an error is detected. Its tile letter states
 // are "tbd" (a letter has been chosen but we don't know if it's in the word
 // yet) and "empty" (no letter).
-export function CurrentRow({ attempt, columnCount, animationType }) {
+export function CurrentRow({ attempt, animationType }) {
+  const secret = useContext(Secret);
+  const columnCount = secret.length;
+
   let animation = 'idle';
   if (animationType === 'error') {
     animation = 'shake';

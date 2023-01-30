@@ -61,7 +61,6 @@ function Board({ history, currentAttempt, result, rowCount, columnCount }) {
         {
           <HistoryRowsMemo
             history={history}
-            columnCount={columnCount}
             isRevealing={isRevealing}
             hasWinner={hasWinner}
           />
@@ -69,11 +68,10 @@ function Board({ history, currentAttempt, result, rowCount, columnCount }) {
         {attemptsLeft > 0 && (
           <CurrentRowMemo
             attempt={currentAttempt}
-            columnCount={columnCount}
             animationType={hasError ? 'error' : null}
           />
         )}
-        {<EmptyRowsMemo emptyCount={emptyCount} columnCount={columnCount} />}
+        {<EmptyRowsMemo emptyCount={emptyCount} />}
       </div>
     </div>
   );

@@ -212,17 +212,12 @@ export default function Game() {
         <Board
           history={history}
           currentAttempt={currentAttempt}
-          rowCount={limit}
           result={result}
+          rowCount={limit}
           columnCount={secret.length}
           onKeyDown={handleKeyDown}
         />
-        <Keyboard
-          history={history}
-          columnCount={secret.length}
-          onKey={handleKey}
-          fade={gameOver}
-        />
+        <Keyboard history={history} onKey={handleKey} fade={gameOver} />
       </div>
       <div className='actions'>
         <NewGameButton onClick={resetGame} gameOver={gameOver} />
