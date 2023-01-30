@@ -1,4 +1,4 @@
-import React, { useContext, memo } from 'react';
+import React, { useContext } from 'react';
 
 import Secret from '../Secret';
 import Tile from './Tile';
@@ -38,7 +38,7 @@ function BasicRow({
   );
 }
 
-function HistoryRow({
+export function HistoryRow({
   attempt,
   rowState,
   animationType,
@@ -83,7 +83,7 @@ function HistoryRow({
   );
 }
 
-function EmptyRow({ columnCount }) {
+export function EmptyRow({ columnCount }) {
   return (
     <BasicRow
       rowState='empty'
@@ -96,7 +96,7 @@ function EmptyRow({ columnCount }) {
   );
 }
 
-function CurrentRow({ attempt, columnCount, animationType }) {
+export function CurrentRow({ attempt, columnCount, animationType }) {
   let animation = 'idle';
   if (animationType === 'error') {
     animation = 'shake';
@@ -126,43 +126,4 @@ function CurrentRow({ attempt, columnCount, animationType }) {
   );
 }
 
-function Row({
-  number,
-  attempt,
-  rowState,
-  columnCount,
-  isRevealing = false,
-  animationType = 'idle',
-}) {
-  console.log('row', {
-    number,
-    attempt,
-    rowState,
-    columnCount,
-    animationType,
-  });
-
-  if (rowState === 'empty') {
-    return <EmptyRow columnCount={columnCount} />;
-  } else if (rowState === 'current') {
-    return (
-      <CurrentRow
-        attempt={attempt}
-        columnCount={columnCount}
-        animationType={animationType}
-      />
-    );
-  } else {
-    return (
-      <HistoryRow
-        attempt={attempt}
-        rowState={rowState}
-        animationType={animationType}
-        columnCount={columnCount}
-        isRevealing={isRevealing}
-      />
-    );
-  }
-}
-
-export default memo(Row);
+export default BasicRow;

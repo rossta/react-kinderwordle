@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { memo } from 'react';
 
-import Row from './Row';
+import { HistoryRow, EmptyRow, CurrentRow } from './Row';
 
-export function HistoryRows({
+function HistoryRows({
   history,
   columnCount,
   isRevealing = false,
@@ -14,7 +14,7 @@ export function HistoryRows({
   return (
     <>
       {history.map((attempt, i) => (
-        <Row
+        <HistoryRow
           key={`history-${i}`}
           number={i + 1}
           columnCount={columnCount}
@@ -28,67 +28,52 @@ export function HistoryRows({
   );
 }
 
-export function CurrentRow({ attempt, number, columnCount, hasError }) {
-  return (
-    <Row
-      key='current'
-      attempt={attempt}
-      number={number}
-      rowState='current'
-      columnCount={columnCount}
-      animationType={hasError ? 'error' : null}
-    />
-  );
-}
-
-export function EmptyRows({ emptyCount, startingNumber, columnCount }) {
+function EmptyRows({ emptyCount, columnCount }) {
   const empties = Array(emptyCount).fill(null);
 
   return (
     <>
       {empties.map((_, i) => (
-        <Row
-          key={`empty-${i}`}
-          number={startingNumber + i}
-          attempt=''
-          rowState='empty'
-          columnCount={columnCount}
-        />
+        <EmptyRow key={`empty-${i}`} columnCount={columnCount} />
       ))}
     </>
   );
 }
 
+// Using memo here will ensure we don't unnecessarily re-render board rows when
+// the Board state change. Example: Typing a letter changes "currentAttempt"
+// which affects the CurrentRow but not HistoryRows or EmptyRows.
+const HistoryRowsMemo = memo(HistoryRows);
+const CurrentRowMemo = memo(CurrentRow);
+const EmptyRowsMemo = memo(EmptyRows);
+
 function Board({ history, currentAttempt, result, rowCount, columnCount }) {
   const attemptsLeft = rowCount - history.length;
   const emptyCount = Math.max(attemptsLeft - 1, 0);
+
+  const isRevealing = result && !result.error;
+  const hasError = result && result.error;
+  const hasWinner = result && result.code === 'winner';
 
   return (
     <div className='board-container'>
       <div className='board' style={{ width: `${72.5 * columnCount}px` }}>
         {
-          <HistoryRows
+          <HistoryRowsMemo
             history={history}
             columnCount={columnCount}
-            isRevealing={result && !result.error}
-            hasWinner={result && result.code === 'winner'}
+            isRevealing={isRevealing}
+            hasWinner={hasWinner}
           />
         }
         {attemptsLeft > 0 && (
-          <CurrentRow
+          <CurrentRowMemo
             attempt={currentAttempt}
             columnCount={columnCount}
-            number={history.length + 1}
-            hasError={result && result.error}
+            animationType={hasError ? 'error' : null}
           />
         )}
-        {
-          <EmptyRows
-            emptyCount={emptyCount}
-            columnCount={columnCount}
-            startingNumber={history.length + 2}
-          />
-        }
+        {<EmptyRowsMemo emptyCount={emptyCount} columnCount={columnCount} />}
       </div>
     </div>
   );
