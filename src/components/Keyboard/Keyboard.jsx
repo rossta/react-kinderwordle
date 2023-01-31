@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, memo } from 'react';
 
-import Secret from '../Secret';
+import { History, Secret } from '../Contexts';
 import { getLetterState, REVEAL_TIMEOUT_INCREMENT } from '../Game';
 
 function Button({ letter, keyValue, className, state = 'empty' }) {
@@ -16,57 +16,64 @@ function Button({ letter, keyValue, className, state = 'empty' }) {
   );
 }
 
-function LetterButton({ letter, history, isRevealing }) {
+function LetterButton({ letter, letterState, isRevealing, delay }) {
   const [state, setState] = useState('empty');
 
-  const secret = useContext(Secret);
-
-  const columnCount = secret.length;
-  const letterState = getLetterState({ secret, letter, attempts: history });
+  // For debugging
+  console.log('Keyboard letter', {
+    letter,
+    state,
+    letterState,
+    isRevealing,
+    delay,
+  });
 
   useEffect(() => {
-    if (letterState === 'empty' || !isRevealing) {
-      setState(letterState);
-    } else {
+    if (isRevealing) {
       // When the letter has been used in the previous attempt, we delay revealing
       // its state on the keyboard until the reveal animation has completed
-      const delay = REVEAL_TIMEOUT_INCREMENT * (columnCount + 1);
-
       setTimeout(() => {
         setState(letterState);
       }, delay);
+    } else {
+      setState(letterState);
     }
   }, [letterState]);
 
-  // For debugging
-  console.log({ letter, state, letterState, history });
-
-  return <Button key={letter} letter={letter} state={state} />;
+  return <ButtonMemo key={letter} letter={letter} state={state} />;
 }
 
 const ButtonMemo = memo(Button);
 const LetterButtonMemo = memo(LetterButton);
 
-function Keyboard({ onKey, fade, history, result }) {
+function Keyboard({ onKey, fade, result }) {
+  const secret = useContext(Secret);
+  const history = useContext(History);
+
+  const delay = REVEAL_TIMEOUT_INCREMENT * (secret.length + 1);
+  const isRevealing = result && !result.error;
+
   const onClick = (e) => {
     if (e.target.dataset.key) {
       onKey(e.target.dataset.key);
     }
     return false;
   };
-  const isRevealing = result && !result.error;
 
   const buildLetterButtonsFrom = (letters) =>
-    letters
-      .split('')
-      .map((letter) => (
+    letters.split('').map((letter) => {
+      const letterState = getLetterState({ secret, letter, attempts: history });
+
+      return (
         <LetterButtonMemo
           key={letter}
           letter={letter}
-          history={history}
-          isRevealing={isRevealing}
+          letterState={letterState}
+          isRevealing={isRevealing && letterState !== 'empty'}
+          delay={delay}
         />
-      ));
+      );
+    });
 
   return (
     <div

@@ -1,9 +1,9 @@
-import React, { useContext } from 'react';
+import React, { memo, useCallback, useContext } from 'react';
 
-import Secret from '../Secret';
+import { Secret } from '../Contexts';
 import Tile from './Tile';
 
-import { getLetterState, letterIndexes } from '../Game';
+import { getLetterState } from '../Game';
 
 export function getRowLetterState({ attempt, secret, index }) {
   const letter = attempt[index];
@@ -23,6 +23,7 @@ function BasicRow({
   animation = 'idle',
   style = {},
 }) {
+  console.log('Board row', { rowState });
   return (
     <div
       className='row'
@@ -37,6 +38,8 @@ function BasicRow({
     </div>
   );
 }
+
+const BasicRowMemo = memo(BasicRow);
 
 // A history row displays all previous attempts, including the one just
 // attempted. Letter states will be "correct", "present", or "absent". A
@@ -54,31 +57,36 @@ export function HistoryRow({ attempt, rowState, animationType, isRevealing }) {
     animationDelay = `${columnCount * 250 + 500}ms`;
   }
 
+  const renderTile = useCallback(
+    (index) => {
+      const letterState = getRowLetterState({
+        attempt,
+        secret,
+        index,
+      });
+
+      return (
+        <Tile
+          key={index}
+          index={index}
+          letter={attempt[index]}
+          isRevealing={isRevealing}
+          targetState={letterState}
+        />
+      );
+    },
+    [attempt, secret, isRevealing]
+  );
+
   return (
-    <BasicRow
+    <BasicRowMemo
       rowState={rowState}
       animation={animation}
       style={{
         animationDelay,
       }}
       columnCount={columnCount}
-      renderTile={(index) => {
-        const letterState = getRowLetterState({
-          attempt,
-          secret,
-          index,
-        });
-
-        return (
-          <Tile
-            key={index}
-            index={index}
-            letter={attempt[index]}
-            isRevealing={isRevealing}
-            targetState={letterState}
-          />
-        );
-      }}
+      renderTile={renderTile}
     />
   );
 }
@@ -88,14 +96,17 @@ export function EmptyRow() {
   const secret = useContext(Secret);
   const columnCount = secret.length;
 
+  const renderTile = useCallback(
+    (index) => <Tile key={index} index={index} targetState='empty' />,
+    []
+  );
+
   return (
-    <BasicRow
+    <BasicRowMemo
       rowState='empty'
       animation='idle'
       columnCount={columnCount}
-      renderTile={(index) => (
-        <Tile key={index} index={index} targetState='empty' />
-      )}
+      renderTile={renderTile}
     />
   );
 }
@@ -117,8 +128,9 @@ export function CurrentRow({ attempt, animationType }) {
   };
 
   return (
-    <BasicRow
+    <BasicRowMemo
       rowState='current'
+      rowIndex='current'
       animation={animation}
       columnCount={columnCount}
       renderTile={(index) => {

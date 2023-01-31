@@ -1,5 +1,8 @@
 import React, { memo } from 'react';
 
+import { useContext } from 'react';
+
+import { History } from '../Contexts';
 import { HistoryRow, EmptyRow, CurrentRow } from './Row';
 
 function HistoryRows({
@@ -16,7 +19,6 @@ function HistoryRows({
       {history.map((attempt, i) => (
         <HistoryRow
           key={`history-${i}`}
-          number={i + 1}
           columnCount={columnCount}
           attempt={attempt}
           rowState='attempted'
@@ -28,13 +30,13 @@ function HistoryRows({
   );
 }
 
-function EmptyRows({ emptyCount, columnCount }) {
+function EmptyRows({ emptyCount }) {
   const empties = Array(emptyCount).fill(null);
 
   return (
     <>
       {empties.map((_, i) => (
-        <EmptyRow key={`empty-${i}`} columnCount={columnCount} />
+        <EmptyRow key={`empty-${i}`} />
       ))}
     </>
   );
@@ -47,7 +49,9 @@ const HistoryRowsMemo = memo(HistoryRows);
 const CurrentRowMemo = memo(CurrentRow);
 const EmptyRowsMemo = memo(EmptyRows);
 
-function Board({ history, currentAttempt, result, rowCount, columnCount }) {
+function Board({ currentAttempt, result, rowCount, columnCount }) {
+  const history = useContext(History);
+
   const attemptsLeft = rowCount - history.length;
   const emptyCount = Math.max(attemptsLeft - 1, 0);
 

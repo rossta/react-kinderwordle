@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import Secret from '../Secret';
+import { Secret, History } from '../Contexts';
 import Toast from '../Toast';
 import Board from '../Board';
 import Keyboard from '../Keyboard';
@@ -43,7 +43,6 @@ const usePersistedHistory = () => {
     if (loadedRef.current) return;
 
     const persistedHistory = load('history');
-    console.log('loaded history', history);
 
     loadedRef.current = true;
     if (persistedHistory) {
@@ -96,17 +95,17 @@ function Game() {
   const [currentAttempt, setCurrentAttempt] = useState('');
   const [gameOver, setGameOver] = useState(false);
   const [result, setResult] = useState(null);
+
   const lastAttempt = history.slice(-1)[0];
-
   const attemptCount = history.length;
-
-  useEventListener('keydown', handleKeyDown);
 
   useEffect(() => {
     if (lastAttempt === secret || attemptCount >= limit) {
       setGameOver(true);
     }
-  }, [lastAttempt, attemptCount]);
+  }, []);
+
+  useEventListener('keydown', handleKeyDown);
 
   function resetGame() {
     setHistory([]);
@@ -219,30 +218,26 @@ function Game() {
 
   return (
     <Secret.Provider value={secret}>
-      <div className='game'>
-        <Toast result={result} secret={secret} attemptCount={attemptCount} />
-        <Board
-          history={history}
-          currentAttempt={currentAttempt}
-          result={result}
-          rowCount={limit}
-          columnCount={secret.length}
-          onKeyDown={handleKeyDown}
-        />
-        <Keyboard
-          history={history}
-          result={result}
-          onKey={handleKey}
-          fade={gameOver}
-        />
-      </div>
-      <div className='actions'>
-        <NewGameButton
-          onClick={resetGame}
-          gameOver={gameOver}
-          disabled={!!result}
-        />
-      </div>
+      <History.Provider value={history}>
+        <div className='game'>
+          <Toast result={result} secret={secret} attemptCount={attemptCount} />
+          <Board
+            currentAttempt={currentAttempt}
+            result={result}
+            rowCount={limit}
+            columnCount={secret.length}
+            onKeyDown={handleKeyDown}
+          />
+          <Keyboard result={result} onKey={handleKey} fade={gameOver} />
+        </div>
+        <div className='actions'>
+          <NewGameButton
+            onClick={resetGame}
+            gameOver={gameOver}
+            disabled={!!result}
+          />
+        </div>
+      </History.Provider>
     </Secret.Provider>
   );
 }
