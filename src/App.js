@@ -15,7 +15,7 @@ function App() {
 
   return (
     <div className='app'>
-      <header>
+      <header role='title'>
         <div></div>
         <div className='title'>Kinderwordle</div>
         <div>
