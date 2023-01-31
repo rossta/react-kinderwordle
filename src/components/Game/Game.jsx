@@ -104,7 +104,7 @@ function Game() {
 
   useEffect(() => {
     if (lastAttempt === secret || attemptCount >= limit) {
-      setTimeout(() => setGameOver(true), LONGER_TIMEOUT);
+      setGameOver(true);
     }
   }, [lastAttempt, attemptCount]);
 
@@ -229,7 +229,12 @@ function Game() {
           columnCount={secret.length}
           onKeyDown={handleKeyDown}
         />
-        <Keyboard history={history} onKey={handleKey} fade={gameOver} />
+        <Keyboard
+          history={history}
+          result={result}
+          onKey={handleKey}
+          fade={gameOver}
+        />
       </div>
       <div className='actions'>
         <NewGameButton
